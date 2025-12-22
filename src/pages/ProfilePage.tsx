@@ -2,13 +2,13 @@ import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGameStore } from '@/stores/gameStore';
-import { StatsDisplay } from '@/components/StatsDisplay';
+import { StatsRadarChart } from '@/components/StatsRadarChart';
+import { AvatarPreview } from '@/components/AvatarPreview';
 import { Trophy, Flame, Target, Coins, MapPin } from 'lucide-react';
-import { calculateXpForLevel } from '@/types/game';
 
 export default function ProfilePage() {
   const { user } = useAuth();
-  const { profile, fetchProfile } = useGameStore();
+  const { profile, fetchProfile, equippedCosmetics } = useGameStore();
 
   useEffect(() => {
     if (user && !profile) {
@@ -32,6 +32,8 @@ export default function ProfilePage() {
     soc: profile.stat_soc,
   };
 
+  const equippedAvatar = equippedCosmetics.avatar || profile.avatar_url;
+
   return (
     <div className="min-h-screen pb-24 px-4 pt-6">
       <motion.h1 
@@ -48,10 +50,22 @@ export default function ProfilePage() {
         animate={{ opacity: 1, y: 0 }}
         className="card-game p-5 text-center mb-4"
       >
-        <div className="w-20 h-20 mx-auto mb-3 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-          <span className="font-display text-2xl font-bold text-primary-foreground">
-            {profile.username.slice(0, 2).toUpperCase()}
-          </span>
+        <div className="flex justify-center mb-3">
+          {equippedAvatar ? (
+            <AvatarPreview
+              avatarId={equippedAvatar}
+              name={profile.username}
+              rarity="rare"
+              size="xl"
+              showGlow
+            />
+          ) : (
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+              <span className="font-display text-3xl font-bold text-primary-foreground">
+                {profile.username.slice(0, 2).toUpperCase()}
+              </span>
+            </div>
+          )}
         </div>
         <h2 className="font-display text-xl font-bold text-foreground">{profile.username}</h2>
         <p className="text-sm text-primary">{profile.active_title || 'Hunter'}</p>
@@ -101,15 +115,17 @@ export default function ProfilePage() {
         </div>
       </motion.div>
 
-      {/* Character Stats */}
+      {/* Character Stats Radar */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
         className="card-game p-5"
       >
-        <h3 className="font-display text-lg font-bold text-foreground mb-4">Character Stats</h3>
-        <StatsDisplay stats={stats} />
+        <h3 className="font-display text-lg font-bold text-foreground mb-4 text-center">Character Stats</h3>
+        <div className="flex justify-center">
+          <StatsRadarChart stats={stats} size={220} />
+        </div>
       </motion.div>
     </div>
   );

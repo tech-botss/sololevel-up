@@ -29,6 +29,16 @@ interface UserProfile {
   rank_city: number;
   active_title?: string;
   missed_days: number;
+  gender?: string;
+}
+
+interface EquippedCosmetics {
+  avatar?: string;
+  outfit?: string;
+  weapon?: string;
+  aura?: string;
+  name_color?: string;
+  frame?: string;
 }
 
 interface GameState {
@@ -36,6 +46,8 @@ interface GameState {
   activeQuest: ActiveQuest | null;
   questsCompletedToday: number;
   loading: boolean;
+  ownedCosmetics: string[];
+  equippedCosmetics: EquippedCosmetics;
   
   // Actions
   fetchProfile: (userId: string) => Promise<void>;
@@ -47,6 +59,9 @@ interface GameState {
   abandonQuest: () => void;
   updateQuestTimer: (remainingSeconds: number) => void;
   purchaseCosmetic: (cosmeticId: string, price: number) => Promise<boolean>;
+  fetchOwnedCosmetics: (userId: string) => Promise<void>;
+  equipCosmetic: (cosmeticId: string, category: string) => Promise<boolean>;
+  unequipCosmetic: (category: string) => Promise<boolean>;
 }
 
 export const useGameStore = create<GameState>()((set, get) => ({
@@ -54,6 +69,8 @@ export const useGameStore = create<GameState>()((set, get) => ({
   activeQuest: null,
   questsCompletedToday: 0,
   loading: false,
+  ownedCosmetics: [],
+  equippedCosmetics: {},
   
   fetchProfile: async (userId: string) => {
     set({ loading: true });
@@ -66,9 +83,43 @@ export const useGameStore = create<GameState>()((set, get) => ({
       
       if (error) throw error;
       set({ profile: data as UserProfile, loading: false });
+      
+      // Also fetch owned cosmetics
+      get().fetchOwnedCosmetics(userId);
     } catch (error) {
       console.error('Error fetching profile:', error);
       set({ loading: false });
+    }
+  },
+  
+  fetchOwnedCosmetics: async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_cosmetics')
+        .select('cosmetic_id, equipped')
+        .eq('user_id', userId);
+      
+      if (error) throw error;
+      
+      const owned = data?.map(c => c.cosmetic_id) || [];
+      const equipped: EquippedCosmetics = {};
+      
+      // Build equipped cosmetics map
+      data?.forEach(c => {
+        if (c.equipped) {
+          // Determine category from cosmetic_id prefix
+          if (c.cosmetic_id.startsWith('avatar-')) equipped.avatar = c.cosmetic_id;
+          else if (c.cosmetic_id.startsWith('outfit-')) equipped.outfit = c.cosmetic_id;
+          else if (c.cosmetic_id.startsWith('weapon-')) equipped.weapon = c.cosmetic_id;
+          else if (c.cosmetic_id.startsWith('aura-')) equipped.aura = c.cosmetic_id;
+          else if (c.cosmetic_id.startsWith('color-')) equipped.name_color = c.cosmetic_id;
+          else if (c.cosmetic_id.startsWith('frame-')) equipped.frame = c.cosmetic_id;
+        }
+      });
+      
+      set({ ownedCosmetics: owned, equippedCosmetics: equipped });
+    } catch (error) {
+      console.error('Error fetching owned cosmetics:', error);
     }
   },
   
@@ -214,7 +265,7 @@ export const useGameStore = create<GameState>()((set, get) => ({
   },
   
   purchaseCosmetic: async (cosmeticId: string, price: number) => {
-    const { profile } = get();
+    const { profile, ownedCosmetics } = get();
     if (!profile || profile.gold < price) return false;
     
     try {
@@ -232,10 +283,91 @@ export const useGameStore = create<GameState>()((set, get) => ({
           ...profile,
           gold: profile.gold - price,
         },
+        ownedCosmetics: [...ownedCosmetics, cosmeticId],
       });
       return true;
     } catch (error) {
       console.error('Error purchasing cosmetic:', error);
+      return false;
+    }
+  },
+  
+  equipCosmetic: async (cosmeticId: string, category: string) => {
+    const { profile, equippedCosmetics, ownedCosmetics } = get();
+    if (!profile || !ownedCosmetics.includes(cosmeticId)) return false;
+    
+    try {
+      // First unequip any currently equipped item of this category
+      const categoryKey = category === 'avatars' ? 'avatar' : 
+                         category === 'outfits' ? 'outfit' :
+                         category === 'weapons' ? 'weapon' :
+                         category === 'auras' ? 'aura' :
+                         category === 'name_colors' ? 'name_color' : 'frame';
+      
+      const currentEquipped = equippedCosmetics[categoryKey as keyof EquippedCosmetics];
+      
+      if (currentEquipped) {
+        await supabase.from('user_cosmetics')
+          .update({ equipped: false })
+          .eq('user_id', profile.id)
+          .eq('cosmetic_id', currentEquipped);
+      }
+      
+      // Equip the new item
+      await supabase.from('user_cosmetics')
+        .update({ equipped: true })
+        .eq('user_id', profile.id)
+        .eq('cosmetic_id', cosmeticId);
+      
+      // Update avatar_url in profile if equipping an avatar
+      if (category === 'avatars') {
+        await supabase.from('profiles')
+          .update({ avatar_url: cosmeticId })
+          .eq('id', profile.id);
+        
+        set({
+          profile: { ...profile, avatar_url: cosmeticId },
+          equippedCosmetics: { ...equippedCosmetics, [categoryKey]: cosmeticId }
+        });
+      } else {
+        set({
+          equippedCosmetics: { ...equippedCosmetics, [categoryKey]: cosmeticId }
+        });
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error equipping cosmetic:', error);
+      return false;
+    }
+  },
+  
+  unequipCosmetic: async (category: string) => {
+    const { profile, equippedCosmetics } = get();
+    if (!profile) return false;
+    
+    const categoryKey = category === 'avatars' ? 'avatar' : 
+                       category === 'outfits' ? 'outfit' :
+                       category === 'weapons' ? 'weapon' :
+                       category === 'auras' ? 'aura' :
+                       category === 'name_colors' ? 'name_color' : 'frame';
+    
+    const currentEquipped = equippedCosmetics[categoryKey as keyof EquippedCosmetics];
+    if (!currentEquipped) return true;
+    
+    try {
+      await supabase.from('user_cosmetics')
+        .update({ equipped: false })
+        .eq('user_id', profile.id)
+        .eq('cosmetic_id', currentEquipped);
+      
+      const newEquipped = { ...equippedCosmetics };
+      delete newEquipped[categoryKey as keyof EquippedCosmetics];
+      
+      set({ equippedCosmetics: newEquipped });
+      return true;
+    } catch (error) {
+      console.error('Error unequipping cosmetic:', error);
       return false;
     }
   },
