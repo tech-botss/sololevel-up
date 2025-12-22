@@ -1,4 +1,25 @@
 @tailwind base;
+
+/* Phone Input Styling */
+.PhoneInput {
+  display: flex;
+  align-items: center;
+}
+
+.PhoneInputCountrySelect {
+  background-color: transparent !important;
+  border: none !important;
+  color: inherit;
+}
+
+.PhoneInputCountrySelectArrow {
+  border-color: currentColor !important;
+}
+
+.PhoneInputCountryIcon--border {
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
 @tailwind components;
 @tailwind utilities;
 
