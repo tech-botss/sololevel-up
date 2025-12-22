@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { AvatarPreview, CosmeticPreview } from '@/components/AvatarPreview';
+import { AuraPreview, AuraEffect, getAuraTypeFromId } from '@/components/AuraEffect';
 import { Cosmetic } from '@/types/game';
 
 const categories = ['avatars', 'outfits', 'weapons', 'auras', 'name_colors', 'frames'];
@@ -183,6 +184,8 @@ export default function StorePage() {
                       isEquipped={equipped}
                       showGlow={!locked}
                     />
+                  ) : item.category === 'auras' ? (
+                    <AuraPreview auraId={item.id} size="lg" />
                   ) : (
                     <CosmeticPreview
                       category={item.category}
@@ -304,6 +307,12 @@ export default function StorePage() {
                     isEquipped={isEquipped(selectedItem)}
                     showGlow
                   />
+                ) : selectedItem.category === 'auras' ? (
+                  <AuraEffect type={getAuraTypeFromId(selectedItem.id)} size="xl">
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-muted to-card flex items-center justify-center">
+                      <span className="text-4xl">✨</span>
+                    </div>
+                  </AuraEffect>
                 ) : (
                   <CosmeticPreview
                     category={selectedItem.category}

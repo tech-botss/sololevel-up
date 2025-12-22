@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useGameStore } from '@/stores/gameStore';
 import { StatsRadarChart } from '@/components/StatsRadarChart';
 import { AvatarPreview } from '@/components/AvatarPreview';
+import { AuraEffect, getAuraTypeFromId } from '@/components/AuraEffect';
 import { Trophy, Flame, Target, Coins, MapPin } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -33,6 +34,8 @@ export default function ProfilePage() {
   };
 
   const equippedAvatar = equippedCosmetics.avatar || profile.avatar_url;
+  const equippedAura = equippedCosmetics.aura;
+  const auraType = equippedAura ? getAuraTypeFromId(equippedAura) : 'none';
 
   return (
     <div className="min-h-screen pb-24 px-4 pt-6">
@@ -44,31 +47,38 @@ export default function ProfilePage() {
         Profile
       </motion.h1>
 
-      {/* Avatar & Basic Info */}
+      {/* Avatar & Basic Info with Aura */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="card-game p-5 text-center mb-4"
       >
         <div className="flex justify-center mb-3">
-          {equippedAvatar ? (
-            <AvatarPreview
-              avatarId={equippedAvatar}
-              name={profile.username}
-              rarity="rare"
-              size="xl"
-              showGlow
-            />
-          ) : (
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-              <span className="font-display text-3xl font-bold text-primary-foreground">
-                {profile.username.slice(0, 2).toUpperCase()}
-              </span>
-            </div>
-          )}
+          <AuraEffect type={auraType} size="xl">
+            {equippedAvatar ? (
+              <AvatarPreview
+                avatarId={equippedAvatar}
+                name={profile.username}
+                rarity="rare"
+                size="xl"
+                showGlow
+              />
+            ) : (
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                <span className="font-display text-3xl font-bold text-primary-foreground">
+                  {profile.username.slice(0, 2).toUpperCase()}
+                </span>
+              </div>
+            )}
+          </AuraEffect>
         </div>
         <h2 className="font-display text-xl font-bold text-foreground">{profile.username}</h2>
         <p className="text-sm text-primary">{profile.active_title || 'Hunter'}</p>
+        {equippedAura && (
+          <p className="text-xs text-secondary mt-1">
+            ✨ {equippedAura.replace('aura-', '').replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase())} Aura
+          </p>
+        )}
         {profile.city && (
           <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1">
             <MapPin className="w-3 h-3" />
