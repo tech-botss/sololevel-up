@@ -131,13 +131,13 @@ export default function StorePage() {
       </motion.div>
 
       {/* Categories */}
-      <div className="flex gap-2 overflow-x-auto pb-3 mb-4 hide-scrollbar">
+      <div className="flex gap-2 overflow-x-auto pb-3 mb-4 hide-scrollbar scroll-x touch-pan-x">
         {categories.map((cat) => (
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
             className={cn(
-              'px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all',
+              'px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all flex-shrink-0',
               activeCategory === cat 
                 ? 'bg-primary text-primary-foreground shadow-glow-primary' 
                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
