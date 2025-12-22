@@ -1,13 +1,15 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/gameStore';
 import { predefinedQuests } from '@/data/quests';
 import { Quest, QuestCategory } from '@/types/game';
-import { Clock, Zap, Coins, Play, Plus } from 'lucide-react';
+import { Clock, Zap, Coins, Play, Plus, Pause, X, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { CustomQuestBuilder } from '@/components/CustomQuestBuilder';
 import { CurrentDateTime } from '@/components/CurrentDateTime';
+import { Progress } from '@/components/ui/progress';
+import { toast } from 'sonner';
 
 const categories: { id: QuestCategory | 'all'; label: string }[] = [
   { id: 'all', label: 'All' },
@@ -19,7 +21,7 @@ const categories: { id: QuestCategory | 'all'; label: string }[] = [
 ];
 
 export default function QuestsPage() {
-  const { activeQuest, startQuest } = useGameStore();
+  const { activeQuest, startQuest, pauseQuest, resumeQuest, abandonQuest, completeQuest, updateQuestTimer } = useGameStore();
   const [selectedCategory, setSelectedCategory] = useState<QuestCategory | 'all'>('all');
   const [showQuestBuilder, setShowQuestBuilder] = useState(false);
   const [customQuests, setCustomQuests] = useState<Quest[]>([]);
@@ -29,6 +31,17 @@ export default function QuestsPage() {
     ? allQuests 
     : allQuests.filter(q => q.category === selectedCategory);
 
+  // Timer logic for active quest
+  useEffect(() => {
+    if (!activeQuest || activeQuest.isPaused) return;
+
+    const interval = setInterval(() => {
+      updateQuestTimer(activeQuest.remainingSeconds - 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [activeQuest, updateQuestTimer]);
+
   const handleStartQuest = (quest: Quest) => {
     if (!activeQuest) {
       startQuest(quest);
@@ -37,6 +50,33 @@ export default function QuestsPage() {
 
   const handleCreateQuest = (quest: Quest) => {
     setCustomQuests(prev => [quest, ...prev]);
+  };
+
+  const handleCompleteQuest = async () => {
+    const result = await completeQuest();
+    if (result.xpEarned > 0) {
+      toast.success(`Quest Complete! +${result.xpEarned} XP, +${result.goldEarned} Gold`);
+    }
+  };
+
+  const handleAbandonQuest = () => {
+    abandonQuest();
+    toast.info('Quest abandoned');
+  };
+
+  const formatTime = (seconds: number) => {
+    const absSeconds = Math.abs(seconds);
+    const mins = Math.floor(absSeconds / 60);
+    const secs = absSeconds % 60;
+    const sign = seconds < 0 ? '-' : '';
+    return `${sign}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const getProgress = () => {
+    if (!activeQuest) return 0;
+    const totalSeconds = activeQuest.estimatedMinutes * 60;
+    const elapsed = totalSeconds - activeQuest.remainingSeconds;
+    return Math.min(100, Math.max(0, (elapsed / totalSeconds) * 100));
   };
 
   return (
@@ -73,6 +113,106 @@ export default function QuestsPage() {
           </Button>
         </motion.div>
       </div>
+
+      {/* Active Quest Card */}
+      <AnimatePresence>
+        {activeQuest && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="mb-6 p-4 rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-background border border-primary/30 shadow-lg"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                <span className="text-xs font-medium text-primary uppercase tracking-wider">Active Quest</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                onClick={handleAbandonQuest}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <h3 className="font-display text-lg font-bold text-foreground mb-1">
+              {activeQuest.name}
+            </h3>
+            <p className="text-xs text-muted-foreground mb-4">{activeQuest.description}</p>
+
+            {/* Timer Display */}
+            <div className="text-center mb-4">
+              <div className={cn(
+                "font-mono text-4xl font-bold",
+                activeQuest.remainingSeconds < 0 ? "text-destructive" : "text-foreground"
+              )}>
+                {formatTime(activeQuest.remainingSeconds)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {activeQuest.remainingSeconds < 0 ? 'Overtime!' : 'Time Remaining'}
+              </p>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="mb-4">
+              <Progress value={getProgress()} className="h-2" />
+              <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                <span>{Math.round(getProgress())}% complete</span>
+                <span>{activeQuest.estimatedMinutes}min goal</span>
+              </div>
+            </div>
+
+            {/* Rewards Preview */}
+            <div className="flex items-center justify-center gap-6 text-sm mb-4">
+              <span className="flex items-center gap-1 text-primary">
+                <Zap className="w-4 h-4" />
+                +{activeQuest.xpReward} XP
+              </span>
+              <span className="flex items-center gap-1 text-accent">
+                <Coins className="w-4 h-4" />
+                +{activeQuest.goldReward}
+              </span>
+            </div>
+
+            {/* Controls */}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={activeQuest.isPaused ? resumeQuest : pauseQuest}
+              >
+                {activeQuest.isPaused ? (
+                  <>
+                    <Play className="w-4 h-4 mr-2" />
+                    Resume
+                  </>
+                ) : (
+                  <>
+                    <Pause className="w-4 h-4 mr-2" />
+                    Pause
+                  </>
+                )}
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={handleCompleteQuest}
+                disabled={activeQuest.remainingSeconds > 0}
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Complete
+              </Button>
+            </div>
+            {activeQuest.remainingSeconds > 0 && (
+              <p className="text-center text-[10px] text-muted-foreground mt-2">
+                Complete button unlocks when timer reaches 0
+              </p>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Category Filter */}
       <motion.div 
