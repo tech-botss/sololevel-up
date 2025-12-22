@@ -4,7 +4,9 @@ export type QuestCategory = 'study' | 'fitness' | 'coding' | 'money' | 'social';
 export type QuestDifficulty = 'easy' | 'medium' | 'hard';
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'legendary';
 export type StatType = 'str' | 'int' | 'end' | 'wil' | 'soc';
-export type CosmeticCategory = 'outfits' | 'weapons' | 'auras' | 'name_colors' | 'frames';
+export type CosmeticCategory = 'outfits' | 'weapons' | 'auras' | 'name_colors' | 'frames' | 'avatars';
+export type AvatarGender = 'male' | 'female' | 'neutral';
+export type UnlockType = 'free' | 'shop' | 'level' | 'achievement';
 
 export interface UserStats {
   str: number; // Strength
@@ -80,6 +82,11 @@ export interface Cosmetic {
   price: number;
   rarity: Rarity;
   imageUrl?: string;
+  // Avatar specific
+  gender?: AvatarGender;
+  unlockType?: UnlockType;
+  unlockLevel?: number;
+  unlockAchievement?: string;
 }
 
 export interface User {
