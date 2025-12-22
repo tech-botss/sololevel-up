@@ -1,6 +1,307 @@
 import { Cosmetic } from '@/types/game';
 
 export const cosmetics: Cosmetic[] = [
+  // ==================== AVATARS - MALE ====================
+  // Free avatars
+  {
+    id: 'avatar-male-warrior-basic',
+    name: 'Warrior Trainee',
+    description: 'Basic male warrior avatar',
+    category: 'avatars',
+    price: 0,
+    rarity: 'common',
+    gender: 'male',
+    unlockType: 'free',
+  },
+  {
+    id: 'avatar-male-mage-basic',
+    name: 'Mage Apprentice',
+    description: 'Basic male mage avatar',
+    category: 'avatars',
+    price: 0,
+    rarity: 'common',
+    gender: 'male',
+    unlockType: 'free',
+  },
+  {
+    id: 'avatar-male-rogue-basic',
+    name: 'Street Scout',
+    description: 'Basic male rogue avatar',
+    category: 'avatars',
+    price: 0,
+    rarity: 'common',
+    gender: 'male',
+    unlockType: 'free',
+  },
+  // Shop avatars
+  {
+    id: 'avatar-male-knight',
+    name: 'Knight Commander',
+    description: 'Armored male knight avatar',
+    category: 'avatars',
+    price: 1500,
+    rarity: 'uncommon',
+    gender: 'male',
+    unlockType: 'shop',
+  },
+  {
+    id: 'avatar-male-samurai',
+    name: 'Shadow Samurai',
+    description: 'Japanese warrior avatar',
+    category: 'avatars',
+    price: 3000,
+    rarity: 'rare',
+    gender: 'male',
+    unlockType: 'shop',
+  },
+  {
+    id: 'avatar-male-ninja',
+    name: 'Silent Blade',
+    description: 'Stealthy ninja avatar',
+    category: 'avatars',
+    price: 2500,
+    rarity: 'rare',
+    gender: 'male',
+    unlockType: 'shop',
+  },
+  {
+    id: 'avatar-male-cyber',
+    name: 'Cyber Soldier',
+    description: 'Futuristic cyber warrior',
+    category: 'avatars',
+    price: 4000,
+    rarity: 'rare',
+    gender: 'male',
+    unlockType: 'shop',
+  },
+  {
+    id: 'avatar-male-demon',
+    name: 'Demon Lord',
+    description: 'Dark demonic avatar',
+    category: 'avatars',
+    price: 8000,
+    rarity: 'legendary',
+    gender: 'male',
+    unlockType: 'shop',
+  },
+  // Level unlock avatars
+  {
+    id: 'avatar-male-hunter-elite',
+    name: 'Elite Hunter',
+    description: 'Unlocked at Level 10',
+    category: 'avatars',
+    price: 0,
+    rarity: 'uncommon',
+    gender: 'male',
+    unlockType: 'level',
+    unlockLevel: 10,
+  },
+  {
+    id: 'avatar-male-shadow-knight',
+    name: 'Shadow Knight',
+    description: 'Unlocked at Level 25',
+    category: 'avatars',
+    price: 0,
+    rarity: 'rare',
+    gender: 'male',
+    unlockType: 'level',
+    unlockLevel: 25,
+  },
+  {
+    id: 'avatar-male-dragon-slayer',
+    name: 'Dragon Slayer',
+    description: 'Unlocked at Level 50',
+    category: 'avatars',
+    price: 0,
+    rarity: 'legendary',
+    gender: 'male',
+    unlockType: 'level',
+    unlockLevel: 50,
+  },
+  {
+    id: 'avatar-male-monarch',
+    name: 'Shadow Monarch',
+    description: 'Unlocked at Level 75',
+    category: 'avatars',
+    price: 0,
+    rarity: 'legendary',
+    gender: 'male',
+    unlockType: 'level',
+    unlockLevel: 75,
+  },
+
+  // ==================== AVATARS - FEMALE ====================
+  // Free avatars
+  {
+    id: 'avatar-female-warrior-basic',
+    name: 'Warrior Maiden',
+    description: 'Basic female warrior avatar',
+    category: 'avatars',
+    price: 0,
+    rarity: 'common',
+    gender: 'female',
+    unlockType: 'free',
+  },
+  {
+    id: 'avatar-female-mage-basic',
+    name: 'Mage Initiate',
+    description: 'Basic female mage avatar',
+    category: 'avatars',
+    price: 0,
+    rarity: 'common',
+    gender: 'female',
+    unlockType: 'free',
+  },
+  {
+    id: 'avatar-female-rogue-basic',
+    name: 'Shadow Dancer',
+    description: 'Basic female rogue avatar',
+    category: 'avatars',
+    price: 0,
+    rarity: 'common',
+    gender: 'female',
+    unlockType: 'free',
+  },
+  // Shop avatars
+  {
+    id: 'avatar-female-valkyrie',
+    name: 'Valkyrie',
+    description: 'Noble winged warrior',
+    category: 'avatars',
+    price: 1500,
+    rarity: 'uncommon',
+    gender: 'female',
+    unlockType: 'shop',
+  },
+  {
+    id: 'avatar-female-kunoichi',
+    name: 'Kunoichi',
+    description: 'Female ninja assassin',
+    category: 'avatars',
+    price: 2500,
+    rarity: 'rare',
+    gender: 'female',
+    unlockType: 'shop',
+  },
+  {
+    id: 'avatar-female-sorceress',
+    name: 'Dark Sorceress',
+    description: 'Powerful magic wielder',
+    category: 'avatars',
+    price: 3000,
+    rarity: 'rare',
+    gender: 'female',
+    unlockType: 'shop',
+  },
+  {
+    id: 'avatar-female-cyber',
+    name: 'Cyber Huntress',
+    description: 'Futuristic tech warrior',
+    category: 'avatars',
+    price: 4000,
+    rarity: 'rare',
+    gender: 'female',
+    unlockType: 'shop',
+  },
+  {
+    id: 'avatar-female-phoenix',
+    name: 'Phoenix Queen',
+    description: 'Radiant fire avatar',
+    category: 'avatars',
+    price: 8000,
+    rarity: 'legendary',
+    gender: 'female',
+    unlockType: 'shop',
+  },
+  // Level unlock avatars
+  {
+    id: 'avatar-female-hunter-elite',
+    name: 'Elite Huntress',
+    description: 'Unlocked at Level 10',
+    category: 'avatars',
+    price: 0,
+    rarity: 'uncommon',
+    gender: 'female',
+    unlockType: 'level',
+    unlockLevel: 10,
+  },
+  {
+    id: 'avatar-female-shadow-priestess',
+    name: 'Shadow Priestess',
+    description: 'Unlocked at Level 25',
+    category: 'avatars',
+    price: 0,
+    rarity: 'rare',
+    gender: 'female',
+    unlockType: 'level',
+    unlockLevel: 25,
+  },
+  {
+    id: 'avatar-female-dragon-tamer',
+    name: 'Dragon Tamer',
+    description: 'Unlocked at Level 50',
+    category: 'avatars',
+    price: 0,
+    rarity: 'legendary',
+    gender: 'female',
+    unlockType: 'level',
+    unlockLevel: 50,
+  },
+  {
+    id: 'avatar-female-empress',
+    name: 'Shadow Empress',
+    description: 'Unlocked at Level 75',
+    category: 'avatars',
+    price: 0,
+    rarity: 'legendary',
+    gender: 'female',
+    unlockType: 'level',
+    unlockLevel: 75,
+  },
+
+  // ==================== AVATARS - NEUTRAL ====================
+  {
+    id: 'avatar-neutral-ghost',
+    name: 'Phantom Spirit',
+    description: 'Ethereal ghost avatar',
+    category: 'avatars',
+    price: 2000,
+    rarity: 'rare',
+    gender: 'neutral',
+    unlockType: 'shop',
+  },
+  {
+    id: 'avatar-neutral-robot',
+    name: 'Combat Droid',
+    description: 'Mechanical warrior',
+    category: 'avatars',
+    price: 3500,
+    rarity: 'rare',
+    gender: 'neutral',
+    unlockType: 'shop',
+  },
+  {
+    id: 'avatar-neutral-beast',
+    name: 'Shadow Beast',
+    description: 'Mysterious creature',
+    category: 'avatars',
+    price: 5000,
+    rarity: 'legendary',
+    gender: 'neutral',
+    unlockType: 'shop',
+  },
+  {
+    id: 'avatar-neutral-ancient',
+    name: 'Ancient Guardian',
+    description: 'Unlocked at Level 100',
+    category: 'avatars',
+    price: 0,
+    rarity: 'legendary',
+    gender: 'neutral',
+    unlockType: 'level',
+    unlockLevel: 100,
+  },
+
   // ==================== OUTFITS ====================
   {
     id: 'outfit-hunter-basic',
@@ -263,4 +564,29 @@ export function getCosmeticsByCategory(category: string): Cosmetic[] {
 
 export function getCosmeticsByRarity(rarity: string): Cosmetic[] {
   return cosmetics.filter(c => c.rarity === rarity);
+}
+
+export function getAvatarsByGender(gender: 'male' | 'female' | 'neutral'): Cosmetic[] {
+  return cosmetics.filter(c => c.category === 'avatars' && c.gender === gender);
+}
+
+export function getFreeAvatars(): Cosmetic[] {
+  return cosmetics.filter(c => c.category === 'avatars' && c.unlockType === 'free');
+}
+
+export function getShopAvatars(): Cosmetic[] {
+  return cosmetics.filter(c => c.category === 'avatars' && c.unlockType === 'shop');
+}
+
+export function getLevelUnlockAvatars(): Cosmetic[] {
+  return cosmetics.filter(c => c.category === 'avatars' && c.unlockType === 'level');
+}
+
+export function getAvatarsUnlockedAtLevel(level: number): Cosmetic[] {
+  return cosmetics.filter(c => 
+    c.category === 'avatars' && 
+    c.unlockType === 'level' && 
+    c.unlockLevel !== undefined && 
+    c.unlockLevel <= level
+  );
 }
