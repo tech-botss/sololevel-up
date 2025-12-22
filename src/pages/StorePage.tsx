@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
 import { useGameStore } from '@/stores/gameStore';
 import { cosmetics } from '@/data/cosmetics';
+import { supabase } from '@/integrations/supabase/client';
 import { Coins, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -10,19 +12,50 @@ import { toast } from '@/hooks/use-toast';
 const categories = ['all', 'outfits', 'weapons', 'auras', 'name_colors', 'frames'];
 
 export default function StorePage() {
-  const { user, purchaseCosmetic } = useGameStore();
+  const { user } = useAuth();
+  const { profile, fetchProfile, purchaseCosmetic } = useGameStore();
   const [activeCategory, setActiveCategory] = useState('all');
+  const [ownedCosmetics, setOwnedCosmetics] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (user && !profile) {
+      fetchProfile(user.id);
+    }
+  }, [user, profile, fetchProfile]);
+
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from('user_cosmetics')
+        .select('cosmetic_id')
+        .eq('user_id', user.id)
+        .then(({ data }) => {
+          if (data) {
+            setOwnedCosmetics(data.map(c => c.cosmetic_id));
+          }
+        });
+    }
+  }, [user]);
 
   const filtered = activeCategory === 'all' ? cosmetics : cosmetics.filter(c => c.category === activeCategory);
 
-  const handlePurchase = (id: string, price: number, name: string) => {
-    const success = purchaseCosmetic(id, price);
+  const handlePurchase = async (id: string, price: number, name: string) => {
+    const success = await purchaseCosmetic(id, price);
     if (success) {
+      setOwnedCosmetics([...ownedCosmetics, id]);
       toast({ title: 'Purchased!', description: `You now own ${name}` });
     } else {
       toast({ title: 'Not enough gold', variant: 'destructive' });
     }
   };
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-primary">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pb-24 px-4 pt-6">
@@ -34,7 +67,7 @@ export default function StorePage() {
         <h1 className="font-display text-2xl font-bold text-foreground">Store</h1>
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/20 border border-accent/50">
           <Coins className="w-4 h-4 text-accent" />
-          <span className="font-display text-sm font-bold text-accent">{user.gold.toLocaleString()}</span>
+          <span className="font-display text-sm font-bold text-accent">{profile.gold.toLocaleString()}</span>
         </div>
       </motion.div>
 
@@ -57,7 +90,7 @@ export default function StorePage() {
       {/* Items Grid */}
       <div className="grid grid-cols-2 gap-3">
         {filtered.map((item, index) => {
-          const owned = user.ownedCosmetics.includes(item.id);
+          const owned = ownedCosmetics.includes(item.id);
           return (
             <motion.div
               key={item.id}

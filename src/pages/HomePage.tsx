@@ -1,14 +1,24 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
 import { useGameStore } from '@/stores/gameStore';
 import { XPRing } from '@/components/XPRing';
-import { Flame, Coins, AlertTriangle, RefreshCw, Play, Pause } from 'lucide-react';
+import { Flame, Coins, AlertTriangle, RefreshCw, Play, Pause, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { calculateXpForLevel } from '@/types/game';
 
 export default function HomePage() {
-  const { user, activeQuest, questsCompletedToday, updateQuestTimer, completeQuest, pauseQuest, resumeQuest } = useGameStore();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { profile, activeQuest, questsCompletedToday, fetchProfile, updateQuestTimer, completeQuest, pauseQuest, resumeQuest } = useGameStore();
   const [showLevelUp, setShowLevelUp] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      fetchProfile(user.id);
+    }
+  }, [user, fetchProfile]);
 
   // Timer logic
   useEffect(() => {
@@ -29,12 +39,27 @@ export default function HomePage() {
     return `${sign}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleComplete = () => {
-    const result = completeQuest();
+  const handleComplete = async () => {
+    const result = await completeQuest();
     if (result.leveledUp) {
       setShowLevelUp(true);
     }
   };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-primary">Loading...</div>
+      </div>
+    );
+  }
+
+  const xpToNext = calculateXpForLevel(profile.level + 1);
 
   return (
     <div className="min-h-screen pb-24 px-4 pt-6">
@@ -45,9 +70,14 @@ export default function HomePage() {
         className="flex items-center justify-between mb-6"
       >
         <h1 className="font-display text-2xl font-bold gradient-text">SoloRank</h1>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/20 border border-accent/50">
-          <Coins className="w-4 h-4 text-accent" />
-          <span className="font-display text-sm font-bold text-accent">{user.gold.toLocaleString()}</span>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/20 border border-accent/50">
+            <Coins className="w-4 h-4 text-accent" />
+            <span className="font-display text-sm font-bold text-accent">{profile.gold.toLocaleString()}</span>
+          </div>
+          <Button variant="ghost" size="icon" onClick={handleSignOut}>
+            <LogOut className="w-4 h-4" />
+          </Button>
         </div>
       </motion.div>
 
@@ -58,7 +88,7 @@ export default function HomePage() {
         transition={{ delay: 0.1 }}
         className="flex justify-center mb-6"
       >
-        <XPRing currentXp={user.currentXp} xpToNext={user.xpToNextLevel} level={user.level} />
+        <XPRing currentXp={profile.current_xp} xpToNext={xpToNext} level={profile.level} />
       </motion.div>
 
       {/* Quick Stats */}
@@ -71,7 +101,7 @@ export default function HomePage() {
         <div className="card-game p-3 text-center">
           <div className="flex items-center justify-center gap-1 text-orange-400">
             <Flame className="w-4 h-4" />
-            <span className="font-display text-lg font-bold">{user.currentStreak}</span>
+            <span className="font-display text-lg font-bold">{profile.current_streak}</span>
           </div>
           <span className="text-xs text-muted-foreground">Streak</span>
         </div>
@@ -82,7 +112,7 @@ export default function HomePage() {
         <div className="card-game p-3 text-center">
           <div className="flex items-center justify-center gap-1">
             <RefreshCw className="w-3 h-3 text-muted-foreground" />
-            <span className="font-display text-lg font-bold text-foreground">{user.restoresRemaining}</span>
+            <span className="font-display text-lg font-bold text-foreground">{profile.restores_remaining}</span>
           </div>
           <span className="text-xs text-muted-foreground">Restores</span>
         </div>
@@ -147,7 +177,7 @@ export default function HomePage() {
       </motion.div>
 
       {/* Penalty Warning */}
-      {user.pendingPenalty && user.pendingPenalty > 0 && (
+      {profile.missed_days > 0 && (
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -155,7 +185,7 @@ export default function HomePage() {
         >
           <AlertTriangle className="w-4 h-4 text-destructive" />
           <span className="text-sm text-destructive">
-            -{user.pendingPenalty.toLocaleString()} XP penalty ({user.missedDays} day missed)
+            XP penalty applied ({profile.missed_days} day missed)
           </span>
         </motion.div>
       )}
