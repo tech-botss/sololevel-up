@@ -7,7 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { Mail, Phone, ArrowRight, Loader2, Shield, Eye, EyeOff, User, MapPin } from 'lucide-react';
+import { Mail, Phone, ArrowRight, Loader2, Shield, Eye, EyeOff, User, MapPin, AlertCircle } from 'lucide-react';
+import { PhoneInput } from '@/components/PhoneInput';
+import { isValidPhoneNumber } from 'react-phone-number-input';
 import { toast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { countries } from '@/data/locations';
@@ -15,7 +17,6 @@ import { countries } from '@/data/locations';
 // Validation schemas
 const emailSchema = z.string().email('Please enter a valid email');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
-const phoneSchema = z.string().regex(/^\+?[1-9]\d{9,14}$/, 'Please enter a valid phone number');
 const usernameSchema = z.string()
   .min(3, 'Username must be at least 3 characters')
   .max(20, 'Username must be less than 20 characters')
@@ -118,7 +119,17 @@ export default function AuthPage() {
           redirectTo: `${window.location.origin}/`,
         },
       });
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('provider is not enabled')) {
+          toast({ 
+            title: 'Google Login Not Configured', 
+            description: 'Please configure Google OAuth in your backend settings first.',
+            variant: 'destructive' 
+          });
+        } else {
+          throw error;
+        }
+      }
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
@@ -135,7 +146,17 @@ export default function AuthPage() {
           redirectTo: `${window.location.origin}/`,
         },
       });
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('provider is not enabled')) {
+          toast({ 
+            title: 'Facebook Login Not Configured', 
+            description: 'Please configure Facebook OAuth in your backend settings first.',
+            variant: 'destructive' 
+          });
+        } else {
+          throw error;
+        }
+      }
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
@@ -152,7 +173,17 @@ export default function AuthPage() {
           redirectTo: `${window.location.origin}/`,
         },
       });
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('provider is not enabled')) {
+          toast({ 
+            title: 'Apple Login Not Configured', 
+            description: 'Please configure Apple OAuth in your backend settings first.',
+            variant: 'destructive' 
+          });
+        } else {
+          throw error;
+        }
+      }
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
@@ -200,9 +231,8 @@ export default function AuthPage() {
 
   // Phone OTP login
   const handlePhoneOTP = async () => {
-    const result = phoneSchema.safeParse(phone);
-    if (!result.success) {
-      toast({ title: 'Invalid phone', description: result.error.errors[0].message, variant: 'destructive' });
+    if (!phone || !isValidPhoneNumber(phone)) {
+      toast({ title: 'Invalid phone', description: 'Please enter a valid phone number with country code', variant: 'destructive' });
       return;
     }
 
@@ -322,9 +352,8 @@ export default function AuthPage() {
 
   // Register with phone + profile
   const handlePhoneRegister = async () => {
-    const phoneResult = phoneSchema.safeParse(regPhone);
-    if (!phoneResult.success) {
-      toast({ title: 'Invalid phone', description: phoneResult.error.errors[0].message, variant: 'destructive' });
+    if (!regPhone || !isValidPhoneNumber(regPhone)) {
+      toast({ title: 'Invalid phone', description: 'Please enter a valid phone number with country code', variant: 'destructive' });
       return;
     }
     const userResult = usernameSchema.safeParse(username);
@@ -536,12 +565,10 @@ export default function AuthPage() {
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        <Input
-                          type="tel"
-                          placeholder="+1234567890"
+                        <PhoneInput
                           value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          className="h-11"
+                          onChange={(value) => setPhone(value || '')}
+                          placeholder="Phone number"
                         />
                         <Button
                           onClick={handlePhoneOTP}
@@ -656,12 +683,10 @@ export default function AuthPage() {
                         </div>
                       </>
                     ) : (
-                      <Input
-                        type="tel"
-                        placeholder="+1234567890"
+                      <PhoneInput
                         value={regPhone}
-                        onChange={(e) => setRegPhone(e.target.value)}
-                        className="h-11"
+                        onChange={(value) => setRegPhone(value || '')}
+                        placeholder="Phone number"
                       />
                     )}
 
