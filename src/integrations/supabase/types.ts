@@ -139,6 +139,7 @@ export type Database = {
           created_at: string
           current_streak: number
           current_xp: number
+          gender: string | null
           gold: number
           id: string
           last_quest_date: string | null
@@ -171,6 +172,7 @@ export type Database = {
           created_at?: string
           current_streak?: number
           current_xp?: number
+          gender?: string | null
           gold?: number
           id: string
           last_quest_date?: string | null
@@ -203,6 +205,7 @@ export type Database = {
           created_at?: string
           current_streak?: number
           current_xp?: number
+          gender?: string | null
           gold?: number
           id?: string
           last_quest_date?: string | null
