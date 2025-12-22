@@ -74,26 +74,38 @@ export default function AuthPage() {
     try {
       setLoading(true);
       
-      let error;
+      let result;
       if (mode === 'email') {
-        const result = await supabase.auth.verifyOtp({
+        result = await supabase.auth.verifyOtp({
           email,
           token: otp,
           type: 'email',
         });
-        error = result.error;
       } else {
-        const result = await supabase.auth.verifyOtp({
+        result = await supabase.auth.verifyOtp({
           phone,
           token: otp,
           type: 'sms',
         });
-        error = result.error;
       }
       
-      if (error) throw error;
-      toast({ title: 'Welcome, Hunter!', description: 'You have successfully logged in' });
-      navigate('/');
+      if (result.error) throw result.error;
+      
+      // Check if profile setup is complete
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username, country, city')
+        .eq('id', result.data.user?.id)
+        .maybeSingle();
+      
+      // If profile is incomplete, go to setup page
+      if (!profile || !profile.username || profile.username.startsWith('hunter_') || !profile.country || !profile.city) {
+        toast({ title: 'Almost there!', description: 'Complete your profile to enter the ranks' });
+        navigate('/profile-setup');
+      } else {
+        toast({ title: 'Welcome back, Hunter!', description: 'You have successfully logged in' });
+        navigate('/');
+      }
     } catch (error: any) {
       console.error('Verify error:', error);
       toast({ title: 'Verification Failed', description: error.message, variant: 'destructive' });
