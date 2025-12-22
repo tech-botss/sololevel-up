@@ -3,7 +3,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { BottomNav } from "@/components/BottomNav";
+import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/HomePage";
 import QuestsPage from "./pages/QuestsPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -21,19 +24,25 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <div className="mobile-container">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/quests" element={<QuestsPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/leaderboards" element={<LeaderboardsPage />} />
-            <Route path="/friends" element={<FriendsPage />} />
-            <Route path="/store" element={<StorePage />} />
-            <Route path="/achievements" element={<AchievementsPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <BottomNav />
-        </div>
+        <AuthProvider>
+          <div className="mobile-container">
+            <Routes>
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+              <Route path="/quests" element={<ProtectedRoute><QuestsPage /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/leaderboards" element={<ProtectedRoute><LeaderboardsPage /></ProtectedRoute>} />
+              <Route path="/friends" element={<ProtectedRoute><FriendsPage /></ProtectedRoute>} />
+              <Route path="/store" element={<ProtectedRoute><StorePage /></ProtectedRoute>} />
+              <Route path="/achievements" element={<ProtectedRoute><AchievementsPage /></ProtectedRoute>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Routes>
+              <Route path="/auth" element={null} />
+              <Route path="*" element={<BottomNav />} />
+            </Routes>
+          </div>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

@@ -1,14 +1,40 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useGameStore } from '@/stores/gameStore';
-import { mockUsers } from '@/data/mockUsers';
-import { UserPlus, MessageCircle, X, Check } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { UserPlus, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
+interface Friend {
+  id: string;
+  username: string;
+  level: number;
+  active_title?: string;
+}
+
 export default function FriendsPage() {
-  const { user, acceptFriendRequest, rejectFriendRequest, removeFriend } = useGameStore();
-  
-  const friends = mockUsers.filter(u => user.friends.includes(u.id));
+  const { user } = useAuth();
+  const [friends, setFriends] = useState<Friend[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from('friends')
+        .select('friend_id')
+        .eq('user_id', user.id)
+        .then(async ({ data }) => {
+          if (data && data.length > 0) {
+            const friendIds = data.map(f => f.friend_id);
+            const { data: profiles } = await supabase
+              .from('profiles')
+              .select('id, username, level, active_title')
+              .in('id', friendIds);
+            if (profiles) setFriends(profiles);
+          }
+        });
+    }
+  }, [user]);
 
   return (
     <div className="min-h-screen pb-24 px-4 pt-6">
@@ -24,62 +50,34 @@ export default function FriendsPage() {
         </Button>
       </motion.div>
 
-      {/* Friend Requests */}
-      {user.friendRequests.length > 0 && (
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mb-6"
-        >
-          <h2 className="text-sm font-semibold text-muted-foreground mb-2">Requests</h2>
-          {user.friendRequests.map((request) => (
-            <div key={request.fromUserId} className="card-game p-3 flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                <span className="text-sm font-bold">{request.fromUsername.slice(0, 2)}</span>
-              </div>
-              <div className="flex-1">
-                <p className="font-medium text-foreground">{request.fromUsername}</p>
-              </div>
-              <Button size="sm" onClick={() => acceptFriendRequest(request.fromUserId)}>
-                <Check className="w-4 h-4" />
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => rejectFriendRequest(request.fromUserId)}>
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-          ))}
-        </motion.div>
-      )}
-
-      {/* Friends List */}
-      <div className="space-y-2">
-        {friends.map((friend, index) => (
-          <motion.div
-            key={friend.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-            className="card-game p-4 flex items-center gap-3"
-          >
-            <div className="relative">
+      {friends.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No friends yet. Add some hunters!</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {friends.map((friend, index) => (
+            <motion.div
+              key={friend.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              className="card-game p-4 flex items-center gap-3"
+            >
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
                 <span className="font-bold text-primary-foreground">{friend.username.slice(0, 2)}</span>
               </div>
-              <div className={cn(
-                'absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-card',
-                friend.isOnline ? 'bg-status-online' : 'bg-status-offline'
-              )} />
-            </div>
-            <div className="flex-1">
-              <p className="font-semibold text-foreground">{friend.username}</p>
-              <p className="text-xs text-muted-foreground">Level {friend.level} • {friend.activeTitle}</p>
-            </div>
-            <Button size="sm" variant="ghost">
-              <MessageCircle className="w-4 h-4" />
-            </Button>
-          </motion.div>
-        ))}
-      </div>
+              <div className="flex-1">
+                <p className="font-semibold text-foreground">{friend.username}</p>
+                <p className="text-xs text-muted-foreground">Level {friend.level} • {friend.active_title || 'Hunter'}</p>
+              </div>
+              <Button size="sm" variant="ghost">
+                <MessageCircle className="w-4 h-4" />
+              </Button>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

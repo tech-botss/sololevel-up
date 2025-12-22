@@ -1,262 +1,242 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { User, ActiveQuest, CompletedQuest, Quest, calculateLevelFromXp, calculateGoldReward, calculateLatePenalty } from '@/types/game';
-import { currentUser } from '@/data/mockUsers';
+import { supabase } from '@/integrations/supabase/client';
+import { Quest, ActiveQuest, CompletedQuest, calculateLevelFromXp, calculateGoldReward, calculateLatePenalty } from '@/types/game';
+
+interface UserProfile {
+  id: string;
+  username: string;
+  avatar_url?: string;
+  level: number;
+  current_xp: number;
+  total_xp: number;
+  gold: number;
+  stat_str: number;
+  stat_int: number;
+  stat_end: number;
+  stat_wil: number;
+  stat_soc: number;
+  current_streak: number;
+  longest_streak: number;
+  total_quests_completed: number;
+  total_gold_earned: number;
+  restores_remaining: number;
+  country?: string;
+  state?: string;
+  city?: string;
+  rank_global: number;
+  rank_country: number;
+  rank_state: number;
+  rank_city: number;
+  active_title?: string;
+  missed_days: number;
+}
 
 interface GameState {
-  user: User;
+  profile: UserProfile | null;
   activeQuest: ActiveQuest | null;
-  completedQuests: CompletedQuest[];
   questsCompletedToday: number;
+  loading: boolean;
   
   // Actions
+  fetchProfile: (userId: string) => Promise<void>;
+  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   startQuest: (quest: Quest) => void;
   pauseQuest: () => void;
   resumeQuest: () => void;
-  completeQuest: () => { xpEarned: number; goldEarned: number; wasLate: boolean; leveledUp: boolean; newLevel?: number };
+  completeQuest: () => Promise<{ xpEarned: number; goldEarned: number; wasLate: boolean; leveledUp: boolean; newLevel?: number }>;
   abandonQuest: () => void;
   updateQuestTimer: (remainingSeconds: number) => void;
-  
-  // User actions
-  addFriend: (friendId: string) => void;
-  removeFriend: (friendId: string) => void;
-  acceptFriendRequest: (fromUserId: string) => void;
-  rejectFriendRequest: (fromUserId: string) => void;
-  
-  // Cosmetics
-  purchaseCosmetic: (cosmeticId: string, price: number) => boolean;
-  equipCosmetic: (category: string, cosmeticId: string) => void;
-  
-  // Location
-  updateLocation: (country: string, state: string, city: string) => void;
-  
-  // Restore
-  useRestore: () => boolean;
+  purchaseCosmetic: (cosmeticId: string, price: number) => Promise<boolean>;
 }
 
-export const useGameStore = create<GameState>()(
-  persist(
-    (set, get) => ({
-      user: currentUser,
-      activeQuest: null,
-      completedQuests: [],
-      questsCompletedToday: 2,
+export const useGameStore = create<GameState>()((set, get) => ({
+  profile: null,
+  activeQuest: null,
+  questsCompletedToday: 0,
+  loading: false,
+  
+  fetchProfile: async (userId: string) => {
+    set({ loading: true });
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
       
-      startQuest: (quest: Quest) => {
-        const activeQuest: ActiveQuest = {
-          ...quest,
-          startedAt: new Date(),
-          remainingSeconds: quest.estimatedMinutes * 60,
-          isPaused: false,
-          totalPausedTime: 0,
-        };
-        set({ activeQuest });
-      },
-      
-      pauseQuest: () => {
-        const { activeQuest } = get();
-        if (activeQuest && !activeQuest.isPaused) {
-          set({
-            activeQuest: {
-              ...activeQuest,
-              isPaused: true,
-              pausedAt: new Date(),
-            },
-          });
-        }
-      },
-      
-      resumeQuest: () => {
-        const { activeQuest } = get();
-        if (activeQuest && activeQuest.isPaused && activeQuest.pausedAt) {
-          const pausedDuration = (Date.now() - activeQuest.pausedAt.getTime()) / 1000;
-          set({
-            activeQuest: {
-              ...activeQuest,
-              isPaused: false,
-              pausedAt: undefined,
-              totalPausedTime: activeQuest.totalPausedTime + pausedDuration,
-            },
-          });
-        }
-      },
-      
-      completeQuest: () => {
-        const { activeQuest, user, completedQuests, questsCompletedToday } = get();
-        if (!activeQuest) return { xpEarned: 0, goldEarned: 0, wasLate: false, leveledUp: false };
-        
-        const timeTaken = (activeQuest.estimatedMinutes * 60) - activeQuest.remainingSeconds;
-        const wasLate = activeQuest.remainingSeconds < 0;
-        const minutesLate = wasLate ? Math.abs(activeQuest.remainingSeconds) / 60 : 0;
-        const penalty = calculateLatePenalty(minutesLate);
-        
-        const xpEarned = Math.floor(activeQuest.xpReward * (1 - penalty / 100));
-        const goldEarned = activeQuest.goldReward;
-        
-        const newTotalXp = user.totalXp + xpEarned;
-        const { level: newLevel, currentXp, xpToNext } = calculateLevelFromXp(newTotalXp);
-        const leveledUp = newLevel > user.level;
-        const levelUpGold = leveledUp ? calculateGoldReward(newLevel) : 0;
-        
-        // Update stats
-        const newStats = { ...user.stats };
-        Object.entries(activeQuest.statBoosts).forEach(([stat, boost]) => {
-          if (boost) {
-            newStats[stat as keyof typeof newStats] = Math.min(100, newStats[stat as keyof typeof newStats] + boost);
-          }
-        });
-        
-        const completedQuest: CompletedQuest = {
-          questId: activeQuest.id,
-          questName: activeQuest.name,
-          completedAt: new Date(),
-          timeTaken,
-          xpEarned,
-          goldEarned,
-          wasLate,
-          latePenalty: wasLate ? penalty : undefined,
-        };
-        
-        set({
-          activeQuest: null,
-          user: {
-            ...user,
-            level: newLevel,
-            currentXp,
-            xpToNextLevel: xpToNext,
-            totalXp: newTotalXp,
-            gold: user.gold + goldEarned + levelUpGold,
-            stats: newStats,
-            totalQuestsCompleted: user.totalQuestsCompleted + 1,
-            totalGoldEarned: user.totalGoldEarned + goldEarned + levelUpGold,
-            currentStreak: user.currentStreak, // Would update based on date logic
-            lastQuestCompletedDate: new Date(),
-          },
-          completedQuests: [...completedQuests, completedQuest],
-          questsCompletedToday: questsCompletedToday + 1,
-        });
-        
-        return { xpEarned, goldEarned: goldEarned + levelUpGold, wasLate, leveledUp, newLevel: leveledUp ? newLevel : undefined };
-      },
-      
-      abandonQuest: () => {
-        set({ activeQuest: null });
-      },
-      
-      updateQuestTimer: (remainingSeconds: number) => {
-        const { activeQuest } = get();
-        if (activeQuest) {
-          set({
-            activeQuest: {
-              ...activeQuest,
-              remainingSeconds,
-            },
-          });
-        }
-      },
-      
-      addFriend: (friendId: string) => {
-        const { user } = get();
-        if (!user.friends.includes(friendId)) {
-          set({
-            user: {
-              ...user,
-              friends: [...user.friends, friendId],
-            },
-          });
-        }
-      },
-      
-      removeFriend: (friendId: string) => {
-        const { user } = get();
-        set({
-          user: {
-            ...user,
-            friends: user.friends.filter(id => id !== friendId),
-          },
-        });
-      },
-      
-      acceptFriendRequest: (fromUserId: string) => {
-        const { user } = get();
-        set({
-          user: {
-            ...user,
-            friends: [...user.friends, fromUserId],
-            friendRequests: user.friendRequests.filter(r => r.fromUserId !== fromUserId),
-          },
-        });
-      },
-      
-      rejectFriendRequest: (fromUserId: string) => {
-        const { user } = get();
-        set({
-          user: {
-            ...user,
-            friendRequests: user.friendRequests.filter(r => r.fromUserId !== fromUserId),
-          },
-        });
-      },
-      
-      purchaseCosmetic: (cosmeticId: string, price: number) => {
-        const { user } = get();
-        if (user.gold >= price && !user.ownedCosmetics.includes(cosmeticId)) {
-          set({
-            user: {
-              ...user,
-              gold: user.gold - price,
-              ownedCosmetics: [...user.ownedCosmetics, cosmeticId],
-            },
-          });
-          return true;
-        }
-        return false;
-      },
-      
-      equipCosmetic: (category: string, cosmeticId: string) => {
-        const { user } = get();
-        set({
-          user: {
-            ...user,
-            equippedCosmetics: {
-              ...user.equippedCosmetics,
-              [category]: cosmeticId,
-            },
-          },
-        });
-      },
-      
-      updateLocation: (country: string, state: string, city: string) => {
-        const { user } = get();
-        set({
-          user: {
-            ...user,
-            location: { country, state, city },
-          },
-        });
-      },
-      
-      useRestore: () => {
-        const { user } = get();
-        if (user.restoresRemaining > 0) {
-          set({
-            user: {
-              ...user,
-              restoresRemaining: user.restoresRemaining - 1,
-              missedDays: Math.max(0, user.missedDays - 1),
-            },
-          });
-          return true;
-        }
-        return false;
-      },
-    }),
-    {
-      name: 'solorank-storage',
-      partialize: (state) => ({
-        user: state.user,
-        completedQuests: state.completedQuests,
-      }),
+      if (error) throw error;
+      set({ profile: data as UserProfile, loading: false });
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      set({ loading: false });
     }
-  )
-);
+  },
+  
+  updateProfile: async (updates: Partial<UserProfile>) => {
+    const { profile } = get();
+    if (!profile) return;
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', profile.id);
+      
+      if (error) throw error;
+      set({ profile: { ...profile, ...updates } });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+  },
+  
+  startQuest: (quest: Quest) => {
+    const activeQuest: ActiveQuest = {
+      ...quest,
+      startedAt: new Date(),
+      remainingSeconds: quest.estimatedMinutes * 60,
+      isPaused: false,
+      totalPausedTime: 0,
+    };
+    set({ activeQuest });
+  },
+  
+  pauseQuest: () => {
+    const { activeQuest } = get();
+    if (activeQuest && !activeQuest.isPaused) {
+      set({
+        activeQuest: {
+          ...activeQuest,
+          isPaused: true,
+          pausedAt: new Date(),
+        },
+      });
+    }
+  },
+  
+  resumeQuest: () => {
+    const { activeQuest } = get();
+    if (activeQuest && activeQuest.isPaused && activeQuest.pausedAt) {
+      const pausedDuration = (Date.now() - activeQuest.pausedAt.getTime()) / 1000;
+      set({
+        activeQuest: {
+          ...activeQuest,
+          isPaused: false,
+          pausedAt: undefined,
+          totalPausedTime: activeQuest.totalPausedTime + pausedDuration,
+        },
+      });
+    }
+  },
+  
+  completeQuest: async () => {
+    const { activeQuest, profile, questsCompletedToday } = get();
+    if (!activeQuest || !profile) return { xpEarned: 0, goldEarned: 0, wasLate: false, leveledUp: false };
+    
+    const timeTaken = (activeQuest.estimatedMinutes * 60) - activeQuest.remainingSeconds;
+    const wasLate = activeQuest.remainingSeconds < 0;
+    const minutesLate = wasLate ? Math.abs(activeQuest.remainingSeconds) / 60 : 0;
+    const penalty = calculateLatePenalty(minutesLate);
+    
+    const xpEarned = Math.floor(activeQuest.xpReward * (1 - penalty / 100));
+    const goldEarned = activeQuest.goldReward;
+    
+    const newTotalXp = profile.total_xp + xpEarned;
+    const { level: newLevel, currentXp } = calculateLevelFromXp(newTotalXp);
+    const leveledUp = newLevel > profile.level;
+    const levelUpGold = leveledUp ? calculateGoldReward(newLevel) : 0;
+    
+    // Update stats
+    const statUpdates: Partial<UserProfile> = {};
+    if (activeQuest.statBoosts.str) statUpdates.stat_str = Math.min(100, profile.stat_str + activeQuest.statBoosts.str);
+    if (activeQuest.statBoosts.int) statUpdates.stat_int = Math.min(100, profile.stat_int + activeQuest.statBoosts.int);
+    if (activeQuest.statBoosts.end) statUpdates.stat_end = Math.min(100, profile.stat_end + activeQuest.statBoosts.end);
+    if (activeQuest.statBoosts.wil) statUpdates.stat_wil = Math.min(100, profile.stat_wil + activeQuest.statBoosts.wil);
+    if (activeQuest.statBoosts.soc) statUpdates.stat_soc = Math.min(100, profile.stat_soc + activeQuest.statBoosts.soc);
+    
+    // Save completed quest to database
+    try {
+      await supabase.from('completed_quests').insert({
+        user_id: profile.id,
+        quest_id: activeQuest.id,
+        quest_name: activeQuest.name,
+        xp_earned: xpEarned,
+        gold_earned: goldEarned,
+        time_taken: Math.abs(timeTaken),
+        was_late: wasLate,
+      });
+      
+      // Update profile
+      await supabase.from('profiles').update({
+        level: newLevel,
+        current_xp: currentXp,
+        total_xp: newTotalXp,
+        gold: profile.gold + goldEarned + levelUpGold,
+        total_quests_completed: profile.total_quests_completed + 1,
+        total_gold_earned: profile.total_gold_earned + goldEarned + levelUpGold,
+        ...statUpdates,
+      }).eq('id', profile.id);
+      
+      set({
+        activeQuest: null,
+        profile: {
+          ...profile,
+          level: newLevel,
+          current_xp: currentXp,
+          total_xp: newTotalXp,
+          gold: profile.gold + goldEarned + levelUpGold,
+          total_quests_completed: profile.total_quests_completed + 1,
+          total_gold_earned: profile.total_gold_earned + goldEarned + levelUpGold,
+          ...statUpdates,
+        },
+        questsCompletedToday: questsCompletedToday + 1,
+      });
+    } catch (error) {
+      console.error('Error completing quest:', error);
+    }
+    
+    return { xpEarned, goldEarned: goldEarned + levelUpGold, wasLate, leveledUp, newLevel: leveledUp ? newLevel : undefined };
+  },
+  
+  abandonQuest: () => {
+    set({ activeQuest: null });
+  },
+  
+  updateQuestTimer: (remainingSeconds: number) => {
+    const { activeQuest } = get();
+    if (activeQuest) {
+      set({
+        activeQuest: {
+          ...activeQuest,
+          remainingSeconds,
+        },
+      });
+    }
+  },
+  
+  purchaseCosmetic: async (cosmeticId: string, price: number) => {
+    const { profile } = get();
+    if (!profile || profile.gold < price) return false;
+    
+    try {
+      await supabase.from('user_cosmetics').insert({
+        user_id: profile.id,
+        cosmetic_id: cosmeticId,
+      });
+      
+      await supabase.from('profiles').update({
+        gold: profile.gold - price,
+      }).eq('id', profile.id);
+      
+      set({
+        profile: {
+          ...profile,
+          gold: profile.gold - price,
+        },
+      });
+      return true;
+    } catch (error) {
+      console.error('Error purchasing cosmetic:', error);
+      return false;
+    }
+  },
+}));

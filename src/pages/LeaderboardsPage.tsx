@@ -1,19 +1,44 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { globalLeaderboard } from '@/data/mockUsers';
-import { useGameStore } from '@/stores/gameStore';
-import { Trophy, Medal, Search } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 
 const tabs = ['Global', 'Country', 'State', 'City'];
 
+interface LeaderboardEntry {
+  id: string;
+  username: string;
+  level: number;
+  total_xp: number;
+  active_title?: string;
+}
+
 export default function LeaderboardsPage() {
-  const { user } = useGameStore();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('Global');
   const [search, setSearch] = useState('');
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [userRank, setUserRank] = useState(0);
 
-  const filteredLeaderboard = globalLeaderboard.filter(entry =>
+  useEffect(() => {
+    supabase
+      .from('profiles')
+      .select('id, username, level, total_xp, active_title')
+      .order('total_xp', { ascending: false })
+      .limit(100)
+      .then(({ data }) => {
+        if (data) {
+          setLeaderboard(data);
+          const rank = data.findIndex(e => e.id === user?.id);
+          setUserRank(rank >= 0 ? rank + 1 : 999);
+        }
+      });
+  }, [user]);
+
+  const filtered = leaderboard.filter(entry =>
     entry.username.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -27,7 +52,6 @@ export default function LeaderboardsPage() {
         Leaderboards
       </motion.h1>
 
-      {/* Tabs */}
       <div className="flex gap-2 mb-4">
         {tabs.map((tab) => (
           <button
@@ -35,9 +59,7 @@ export default function LeaderboardsPage() {
             onClick={() => setActiveTab(tab)}
             className={cn(
               'px-4 py-2 rounded-lg text-sm font-medium transition-all flex-1',
-              activeTab === tab
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-muted-foreground'
+              activeTab === tab ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
             )}
           >
             {tab}
@@ -45,57 +67,34 @@ export default function LeaderboardsPage() {
         ))}
       </div>
 
-      {/* Search */}
       <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
-          placeholder="Search player..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-10"
-        />
+        <Input placeholder="Search player..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
       </div>
 
-      {/* Your Rank */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="card-game-glow p-4 mb-4"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="font-display text-2xl font-bold text-primary">#{user.ranks.global}</span>
-            <div>
-              <p className="font-semibold text-foreground">{user.username}</p>
-              <p className="text-xs text-muted-foreground">Level {user.level}</p>
-            </div>
+      {userRank > 0 && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card-game-glow p-4 mb-4">
+          <div className="flex items-center justify-between">
+            <span className="font-display text-2xl font-bold text-primary">#{userRank}</span>
+            <span className="text-xs text-primary bg-primary/20 px-2 py-1 rounded-full">Your Rank</span>
           </div>
-          <span className="text-xs text-primary bg-primary/20 px-2 py-1 rounded-full">Top 0.5%</span>
-        </div>
-      </motion.div>
+        </motion.div>
+      )}
 
-      {/* Leaderboard List */}
       <div className="space-y-2">
-        {filteredLeaderboard.slice(0, 20).map((entry, index) => (
+        {filtered.slice(0, 20).map((entry, index) => (
           <motion.div
-            key={entry.userId}
+            key={entry.id}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.03 }}
             className="card-game p-3 flex items-center gap-3"
           >
             <div className="w-8 text-center">
-              {entry.rank <= 3 ? (
-                <span className={cn(
-                  'text-lg',
-                  entry.rank === 1 && 'rank-gold',
-                  entry.rank === 2 && 'rank-silver',
-                  entry.rank === 3 && 'rank-bronze'
-                )}>
-                  {entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : '🥉'}
-                </span>
+              {index < 3 ? (
+                <span className="text-lg">{index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}</span>
               ) : (
-                <span className="font-display text-sm font-bold text-muted-foreground">#{entry.rank}</span>
+                <span className="font-display text-sm font-bold text-muted-foreground">#{index + 1}</span>
               )}
             </div>
             <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
@@ -105,13 +104,7 @@ export default function LeaderboardsPage() {
               <p className="font-medium text-foreground text-sm">{entry.username}</p>
               <p className="text-xs text-muted-foreground">Lv.{entry.level}</p>
             </div>
-            <div className="text-right">
-              <p className="text-xs text-primary font-semibold">{entry.totalXp.toLocaleString()} XP</p>
-              <div className={cn(
-                'w-2 h-2 rounded-full ml-auto',
-                entry.isOnline ? 'bg-status-online' : 'bg-status-offline'
-              )} />
-            </div>
+            <p className="text-xs text-primary font-semibold">{entry.total_xp.toLocaleString()} XP</p>
           </motion.div>
         ))}
       </div>
