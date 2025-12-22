@@ -24,7 +24,7 @@ const usernameSchema = z.string()
 
 type AuthTab = 'login' | 'register';
 type LoginMethod = 'email' | 'phone';
-type AuthStep = 'input' | 'otp';
+type AuthStep = 'input' | 'otp' | 'forgot-password' | 'reset-sent';
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -39,6 +39,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
+  const [resetEmail, setResetEmail] = useState('');
   
   // Register fields (includes profile)
   const [regEmail, setRegEmail] = useState('');
@@ -224,6 +225,29 @@ export default function AuthPage() {
       }
     } catch (error: any) {
       toast({ title: 'Login Failed', description: error.message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Forgot password handler
+  const handleForgotPassword = async () => {
+    const emailResult = emailSchema.safeParse(resetEmail);
+    if (!emailResult.success) {
+      toast({ title: 'Invalid email', description: emailResult.error.errors[0].message, variant: 'destructive' });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth?mode=reset`,
+      });
+      if (error) throw error;
+      setStep('reset-sent');
+      toast({ title: 'Email Sent!', description: 'Check your inbox for the reset link' });
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -562,6 +586,13 @@ export default function AuthPage() {
                         >
                           {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Login'}
                         </Button>
+                        <button
+                          type="button"
+                          onClick={() => { setStep('forgot-password'); setResetEmail(email); }}
+                          className="w-full text-sm text-primary hover:underline"
+                        >
+                          Forgot Password?
+                        </button>
                       </div>
                     ) : (
                       <div className="space-y-3">
@@ -580,7 +611,7 @@ export default function AuthPage() {
                       </div>
                     )}
                   </motion.div>
-                ) : (
+                ) : step === 'otp' ? (
                   <motion.div
                     key="login-otp"
                     initial={{ opacity: 0 }}
@@ -618,7 +649,79 @@ export default function AuthPage() {
                       ← Back
                     </button>
                   </motion.div>
-                )}
+                ) : step === 'forgot-password' ? (
+                  <motion.div
+                    key="forgot-password"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-4"
+                  >
+                    <div className="text-center">
+                      <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-primary/20 flex items-center justify-center">
+                        <Mail className="w-7 h-7 text-primary" />
+                      </div>
+                      <h2 className="font-semibold text-foreground mb-1">Reset Password</h2>
+                      <p className="text-xs text-muted-foreground">Enter your email to receive a reset link</p>
+                    </div>
+
+                    <Input
+                      type="email"
+                      placeholder="Email address"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      className="h-11"
+                    />
+
+                    <Button
+                      onClick={handleForgotPassword}
+                      disabled={loading}
+                      className="w-full h-11"
+                    >
+                      {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Send Reset Link'}
+                    </Button>
+                    <button
+                      onClick={() => setStep('input')}
+                      className="w-full text-sm text-muted-foreground hover:text-foreground"
+                    >
+                      ← Back to Login
+                    </button>
+                  </motion.div>
+                ) : step === 'reset-sent' ? (
+                  <motion.div
+                    key="reset-sent"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-4"
+                  >
+                    <div className="text-center">
+                      <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-green-500/20 flex items-center justify-center">
+                        <Mail className="w-7 h-7 text-green-500" />
+                      </div>
+                      <h2 className="font-semibold text-foreground mb-1">Check Your Email</h2>
+                      <p className="text-xs text-muted-foreground">
+                        We sent a password reset link to<br />
+                        <span className="text-foreground font-medium">{resetEmail}</span>
+                      </p>
+                    </div>
+
+                    <div className="p-3 rounded-lg bg-muted text-xs text-muted-foreground">
+                      <p className="flex items-start gap-2">
+                        <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                        Click the link in your email to reset your password. Check your spam folder if you don't see it.
+                      </p>
+                    </div>
+
+                    <Button
+                      onClick={() => setStep('input')}
+                      variant="outline"
+                      className="w-full h-11"
+                    >
+                      Back to Login
+                    </Button>
+                  </motion.div>
+                ) : null}
               </AnimatePresence>
             </TabsContent>
 
