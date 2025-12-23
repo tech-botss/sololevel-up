@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { BottomNav } from "@/components/BottomNav";
 import AuthPage from "./pages/AuthPage";
 import ProfileSetupPage from "./pages/ProfileSetupPage";
+import ProfileEditPage from "./pages/ProfileEditPage";
 import HomePage from "./pages/HomePage";
 import QuestsPage from "./pages/QuestsPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
               <Route path="/quests" element={<ProtectedRoute><QuestsPage /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/profile/edit" element={<ProtectedRoute><ProfileEditPage /></ProtectedRoute>} />
               <Route path="/leaderboards" element={<ProtectedRoute><LeaderboardsPage /></ProtectedRoute>} />
               <Route path="/friends" element={<ProtectedRoute><FriendsPage /></ProtectedRoute>} />
               <Route path="/store" element={<ProtectedRoute><StorePage /></ProtectedRoute>} />
@@ -42,6 +44,7 @@ const App = () => (
             <Routes>
               <Route path="/auth" element={null} />
               <Route path="/profile-setup" element={null} />
+              <Route path="/profile/edit" element={null} />
               <Route path="*" element={<BottomNav />} />
             </Routes>
           </div>
