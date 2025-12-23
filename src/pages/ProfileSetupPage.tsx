@@ -11,11 +11,25 @@ import { Loader2, User, MapPin, Sparkles } from 'lucide-react';
 import { countries } from '@/data/locations';
 import { SearchableSelect } from '@/components/SearchableSelect';
 import { z } from 'zod';
+import { FloatingParticles, GlowOrb } from '@/components/animations';
 
 const usernameSchema = z.string()
   .min(3, 'Username must be at least 3 characters')
   .max(20, 'Username must be less than 20 characters')
   .regex(/^[a-zA-Z0-9_]+$/, 'Only letters, numbers, and underscores allowed');
+
+const formFieldVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: {
+      delay: i * 0.1,
+      duration: 0.4,
+      ease: 'easeOut' as const,
+    },
+  }),
+};
 
 export default function ProfileSetupPage() {
   const navigate = useNavigate();
@@ -149,36 +163,75 @@ export default function ProfileSetupPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
-      {/* Background effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/20 rounded-full blur-[100px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-accent/20 rounded-full blur-[80px]" />
-      </div>
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
+      {/* Animated Background effects */}
+      <FloatingParticles count={30} color="mixed" size="sm" speed="slow" />
+      <GlowOrb color="primary" position="top-left" size="lg" />
+      <GlowOrb color="accent" position="bottom-right" size="md" />
 
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 30, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
         className="relative z-10 w-full max-w-sm"
       >
         {/* Header */}
-        <div className="text-center mb-8">
+        <motion.div 
+          className="text-center mb-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
           <motion.div 
             className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: 'spring' }}
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ delay: 0.3, type: 'spring', stiffness: 200, damping: 15 }}
+            whileHover={{ scale: 1.1, rotate: 10 }}
           >
-            <Sparkles className="w-10 h-10 text-primary-foreground" />
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+              className="absolute inset-0 rounded-full"
+              style={{
+                background: 'conic-gradient(from 0deg, transparent, hsl(var(--primary) / 0.3), transparent)',
+              }}
+            />
+            <Sparkles className="w-10 h-10 text-primary-foreground relative z-10" />
           </motion.div>
-          <h1 className="font-display text-2xl font-bold text-foreground mb-2">Create Your Hunter Profile</h1>
-          <p className="text-muted-foreground text-sm">Set up your identity before entering the ranks</p>
-        </div>
+          <motion.h1 
+            className="font-display text-2xl font-bold text-foreground mb-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            Create Your Hunter Profile
+          </motion.h1>
+          <motion.p 
+            className="text-muted-foreground text-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            Set up your identity before entering the ranks
+          </motion.p>
+        </motion.div>
 
         {/* Form Card */}
-        <div className="card-game-glow p-6 space-y-5">
+        <motion.div 
+          className="card-game-glow p-6 space-y-5"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+          whileHover={{ boxShadow: '0 0 50px hsl(var(--primary) / 0.3)' }}
+        >
           {/* Username */}
-          <div>
+          <motion.div
+            custom={0}
+            variants={formFieldVariants}
+            initial="hidden"
+            animate="visible"
+          >
             <label className="text-sm text-muted-foreground mb-2 block flex items-center gap-2">
               <User className="w-4 h-4" />
               Hunter Name
@@ -188,26 +241,43 @@ export default function ProfileSetupPage() {
                 placeholder="Choose a unique username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="h-12 pr-10"
+                className="h-12 pr-10 transition-all focus:ring-2 focus:ring-primary/50"
                 maxLength={20}
               />
               {checkingUsername && (
                 <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
               )}
               {!checkingUsername && usernameAvailable === true && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500">✓</span>
+                <motion.span 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500"
+                >
+                  ✓
+                </motion.span>
               )}
               {!checkingUsername && usernameAvailable === false && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-destructive">✗</span>
+                <motion.span 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-destructive animate-shake"
+                >
+                  ✗
+                </motion.span>
               )}
             </div>
-          </div>
+          </motion.div>
 
           {/* Gender */}
-          <div>
+          <motion.div
+            custom={1}
+            variants={formFieldVariants}
+            initial="hidden"
+            animate="visible"
+          >
             <label className="text-sm text-muted-foreground mb-2 block">Gender</label>
             <Select value={gender} onValueChange={setGender}>
-              <SelectTrigger className="h-12">
+              <SelectTrigger className="h-12 transition-all focus:ring-2 focus:ring-primary/50">
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
               <SelectContent>
@@ -217,10 +287,15 @@ export default function ProfileSetupPage() {
                 <SelectItem value="prefer_not_to_say">Prefer not to say</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+          </motion.div>
 
           {/* Location */}
-          <div>
+          <motion.div
+            custom={2}
+            variants={formFieldVariants}
+            initial="hidden"
+            animate="visible"
+          >
             <label className="text-sm text-muted-foreground mb-2 block flex items-center gap-2">
               <MapPin className="w-4 h-4" />
               Location
@@ -239,7 +314,11 @@ export default function ProfileSetupPage() {
             </div>
 
             {/* State */}
-            <div className="mb-3">
+            <motion.div 
+              className="mb-3"
+              initial={{ opacity: 0.5 }}
+              animate={{ opacity: country ? 1 : 0.5 }}
+            >
               <SearchableSelect
                 options={stateOptions}
                 value={state}
@@ -249,10 +328,13 @@ export default function ProfileSetupPage() {
                 disabled={!country}
                 className="h-12"
               />
-            </div>
+            </motion.div>
 
             {/* City */}
-            <div>
+            <motion.div
+              initial={{ opacity: 0.5 }}
+              animate={{ opacity: state ? 1 : 0.5 }}
+            >
               <SearchableSelect
                 options={cityOptions}
                 value={city}
@@ -262,25 +344,41 @@ export default function ProfileSetupPage() {
                 disabled={!state}
                 className="h-12"
               />
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Submit Button */}
-          <Button
-            onClick={handleSubmit}
-            disabled={loading || !username || !gender || !country || !state || !city || !usernameAvailable}
-            className="w-full h-12 bg-gradient-to-r from-primary to-accent hover:opacity-90 font-semibold text-primary-foreground"
+          <motion.div
+            custom={3}
+            variants={formFieldVariants}
+            initial="hidden"
+            animate="visible"
           >
-            {loading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <>
-                Enter the Ranks
-                <Sparkles className="w-5 h-5 ml-2" />
-              </>
-            )}
-          </Button>
-        </div>
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button
+                onClick={handleSubmit}
+                disabled={loading || !username || !gender || !country || !state || !city || !usernameAvailable}
+                className="w-full h-12 bg-gradient-to-r from-primary to-accent hover:opacity-90 font-semibold text-primary-foreground relative overflow-hidden group"
+              >
+                {/* Shimmer effect */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"
+                />
+                {loading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    Enter the Ranks
+                    <Sparkles className="w-5 h-5 ml-2" />
+                  </>
+                )}
+              </Button>
+            </motion.div>
+          </motion.div>
+        </motion.div>
       </motion.div>
     </div>
   );
