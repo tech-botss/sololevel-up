@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { Mail, Phone, ArrowRight, Loader2, Shield, Eye, EyeOff, User, MapPin, AlertCircle } from 'lucide-react';
+import { Mail, Phone, ArrowRight, Loader2, Shield, Eye, EyeOff, User, MapPin, AlertCircle, UserCircle } from 'lucide-react';
 import { PhoneInput } from '@/components/PhoneInput';
 import { isValidPhoneNumber } from 'react-phone-number-input';
 import { toast } from '@/hooks/use-toast';
@@ -189,6 +189,23 @@ export default function AuthPage() {
       }
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Guest login (anonymous)
+  const handleGuestLogin = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.auth.signInAnonymously();
+      if (error) throw error;
+      
+      // Guest users always need to set up their profile
+      toast({ title: 'Welcome, Guest!', description: 'Please set up your profile to continue' });
+      navigate('/profile-setup');
+    } catch (error: any) {
+      toast({ title: 'Guest Login Failed', description: error.message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -524,6 +541,17 @@ export default function AuthPage() {
                         Continue with Apple
                       </Button>
                     </div>
+
+                    {/* Guest Login Option */}
+                    <Button
+                      onClick={handleGuestLogin}
+                      variant="ghost"
+                      className="w-full h-11 gap-3 border border-dashed border-border hover:bg-muted"
+                      disabled={loading}
+                    >
+                      <UserCircle className="w-5 h-5" />
+                      Continue as Guest
+                    </Button>
 
                     <div className="relative">
                       <div className="absolute inset-0 flex items-center">
