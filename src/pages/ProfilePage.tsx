@@ -1,13 +1,16 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGameStore } from '@/stores/gameStore';
 import { StatsRadarChart } from '@/components/StatsRadarChart';
 import { AvatarPreview } from '@/components/AvatarPreview';
 import { AuraEffect, getAuraTypeFromId } from '@/components/AuraEffect';
-import { Trophy, Flame, Target, Coins, MapPin } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Trophy, Flame, Target, Coins, MapPin, Settings } from 'lucide-react';
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { profile, fetchProfile, equippedCosmetics } = useGameStore();
 
@@ -39,13 +42,23 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen pb-24 px-4 pt-6">
-      <motion.h1 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="font-display text-2xl font-bold text-foreground mb-6"
-      >
-        Profile
-      </motion.h1>
+      <div className="flex items-center justify-between mb-6">
+        <motion.h1 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="font-display text-2xl font-bold text-foreground"
+        >
+          Profile
+        </motion.h1>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate('/profile/edit')}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <Settings className="w-5 h-5" />
+        </Button>
+      </div>
 
       {/* Avatar & Basic Info with Aura */}
       <motion.div 

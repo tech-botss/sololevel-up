@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from '@/hooks/use-toast';
 import { Loader2, User, MapPin, Sparkles } from 'lucide-react';
 import { countries } from '@/data/locations';
+import { SearchableSelect } from '@/components/SearchableSelect';
 import { z } from 'zod';
 
 const usernameSchema = z.string()
@@ -28,32 +29,46 @@ export default function ProfileSetupPage() {
   const [state, setState] = useState<string>('');
   const [city, setCity] = useState<string>('');
   
-  const [states, setStates] = useState<string[]>([]);
-  const [cities, setCities] = useState<string[]>([]);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
 
-  // Update states when country changes
-  useEffect(() => {
-    if (country) {
-      const countryData = countries.find(l => l.name === country);
-      const stateNames = countryData?.states.map(s => s.name) || [];
-      setStates(stateNames.slice().sort((a, b) => a.localeCompare(b)));
-      setState('');
-      setCity('');
-      setCities([]);
-    }
+  // Get sorted country options
+  const countryOptions = useMemo(() => {
+    return [...countries]
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map(c => ({ value: c.name, label: c.name }));
+  }, []);
+
+  // Get sorted state options based on selected country
+  const stateOptions = useMemo(() => {
+    if (!country) return [];
+    const countryData = countries.find(l => l.name === country);
+    return (countryData?.states || [])
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map(s => ({ value: s.name, label: s.name }));
   }, [country]);
 
-  // Update cities when state changes
-  useEffect(() => {
-    if (country && state) {
-      const countryData = countries.find(l => l.name === country);
-      const stateData = countryData?.states.find(s => s.name === state);
-      const cityNames = stateData?.cities || [];
-      setCities(cityNames.slice().sort((a, b) => a.localeCompare(b)));
-      setCity('');
-    }
+  // Get sorted city options based on selected state
+  const cityOptions = useMemo(() => {
+    if (!country || !state) return [];
+    const countryData = countries.find(l => l.name === country);
+    const stateData = countryData?.states.find(s => s.name === state);
+    return (stateData?.cities || [])
+      .slice()
+      .sort((a, b) => a.localeCompare(b))
+      .map(c => ({ value: c, label: c }));
   }, [country, state]);
+
+  // Reset state and city when country changes
+  useEffect(() => {
+    setState('');
+    setCity('');
+  }, [country]);
+
+  // Reset city when state changes
+  useEffect(() => {
+    setCity('');
+  }, [state]);
 
   // Check username availability
   useEffect(() => {
@@ -212,42 +227,42 @@ export default function ProfileSetupPage() {
             </label>
             
             {/* Country */}
-            <Select value={country} onValueChange={setCountry}>
-              <SelectTrigger className="h-12 mb-3">
-                <SelectValue placeholder="Select country" />
-              </SelectTrigger>
-              <SelectContent>
-                {[...countries].sort((a, b) => a.name.localeCompare(b.name)).map(loc => (
-                  <SelectItem key={loc.code} value={loc.name}>
-                    {loc.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="mb-3">
+              <SearchableSelect
+                options={countryOptions}
+                value={country}
+                onValueChange={setCountry}
+                placeholder="Select country"
+                searchPlaceholder="Search countries..."
+                className="h-12"
+              />
+            </div>
 
             {/* State */}
-            <Select value={state} onValueChange={setState} disabled={!country}>
-              <SelectTrigger className="h-12 mb-3">
-                <SelectValue placeholder="Select state/province" />
-              </SelectTrigger>
-              <SelectContent>
-                {states.map(s => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="mb-3">
+              <SearchableSelect
+                options={stateOptions}
+                value={state}
+                onValueChange={setState}
+                placeholder="Select state/province"
+                searchPlaceholder="Search states..."
+                disabled={!country}
+                className="h-12"
+              />
+            </div>
 
             {/* City */}
-            <Select value={city} onValueChange={setCity} disabled={!state}>
-              <SelectTrigger className="h-12">
-                <SelectValue placeholder="Select city" />
-              </SelectTrigger>
-              <SelectContent>
-                {cities.map(c => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div>
+              <SearchableSelect
+                options={cityOptions}
+                value={city}
+                onValueChange={setCity}
+                placeholder="Select city"
+                searchPlaceholder="Search cities..."
+                disabled={!state}
+                className="h-12"
+              />
+            </div>
           </div>
 
           {/* Submit Button */}

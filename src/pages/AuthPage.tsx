@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +13,7 @@ import { isValidPhoneNumber } from 'react-phone-number-input';
 import { toast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { countries } from '@/data/locations';
+import { SearchableSelect } from '@/components/SearchableSelect';
 
 // Validation schemas
 const emailSchema = z.string().email('Please enter a valid email');
@@ -54,34 +55,47 @@ export default function AuthPage() {
   const [regStep, setRegStep] = useState<'form' | 'otp'>('form');
   const [regOtp, setRegOtp] = useState('');
   
-  // Location cascading
-  const [states, setStates] = useState<string[]>([]);
-  const [cities, setCities] = useState<string[]>([]);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
 
-  // Update states when country changes
-  useEffect(() => {
-    if (country) {
-      const countryData = countries.find(l => l.name === country);
-      const stateNames = countryData?.states.map(s => s.name) || [];
-      setStates(stateNames.slice().sort((a, b) => a.localeCompare(b)));
-      setState('');
-      setCity('');
-      setCities([]);
-    }
+  // Get sorted country options
+  const countryOptions = useMemo(() => {
+    return [...countries]
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map(c => ({ value: c.name, label: c.name }));
+  }, []);
+
+  // Get sorted state options based on selected country
+  const stateOptions = useMemo(() => {
+    if (!country) return [];
+    const countryData = countries.find(l => l.name === country);
+    return (countryData?.states || [])
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map(s => ({ value: s.name, label: s.name }));
   }, [country]);
 
-  // Update cities when state changes
-  useEffect(() => {
-    if (country && state) {
-      const countryData = countries.find(l => l.name === country);
-      const stateData = countryData?.states.find(s => s.name === state);
-      const cityNames = stateData?.cities || [];
-      setCities(cityNames.slice().sort((a, b) => a.localeCompare(b)));
-      setCity('');
-    }
+  // Get sorted city options based on selected state
+  const cityOptions = useMemo(() => {
+    if (!country || !state) return [];
+    const countryData = countries.find(l => l.name === country);
+    const stateData = countryData?.states.find(s => s.name === state);
+    return (stateData?.cities || [])
+      .slice()
+      .sort((a, b) => a.localeCompare(b))
+      .map(c => ({ value: c, label: c }));
   }, [country, state]);
+
+  // Reset state and city when country changes
+  useEffect(() => {
+    setState('');
+    setCity('');
+  }, [country]);
+
+  // Reset city when state changes
+  useEffect(() => {
+    setCity('');
+  }, [state]);
 
   // Check username availability
   useEffect(() => {
@@ -860,38 +874,38 @@ export default function AuthPage() {
                         <MapPin className="w-3 h-3" /> Location
                       </p>
                       
-                      <Select value={country} onValueChange={setCountry}>
-                        <SelectTrigger className="h-11 mb-2">
-                          <SelectValue placeholder="Country" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {[...countries].sort((a, b) => a.name.localeCompare(b.name)).map(c => (
-                            <SelectItem key={c.code} value={c.name}>{c.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="mb-2">
+                        <SearchableSelect
+                          options={countryOptions}
+                          value={country}
+                          onValueChange={setCountry}
+                          placeholder="Country"
+                          searchPlaceholder="Search countries..."
+                          className="h-11"
+                        />
+                      </div>
 
-                      <Select value={state} onValueChange={setState} disabled={!country}>
-                        <SelectTrigger className="h-11 mb-2">
-                          <SelectValue placeholder="State/Province" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {states.map(s => (
-                            <SelectItem key={s} value={s}>{s}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="mb-2">
+                        <SearchableSelect
+                          options={stateOptions}
+                          value={state}
+                          onValueChange={setState}
+                          placeholder="State/Province"
+                          searchPlaceholder="Search states..."
+                          disabled={!country}
+                          className="h-11"
+                        />
+                      </div>
 
-                      <Select value={city} onValueChange={setCity} disabled={!state}>
-                        <SelectTrigger className="h-11">
-                          <SelectValue placeholder="City" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {cities.map(c => (
-                            <SelectItem key={c} value={c}>{c}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <SearchableSelect
+                        options={cityOptions}
+                        value={city}
+                        onValueChange={setCity}
+                        placeholder="City"
+                        searchPlaceholder="Search cities..."
+                        disabled={!state}
+                        className="h-11"
+                      />
                     </div>
 
                     <Button
