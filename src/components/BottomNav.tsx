@@ -26,7 +26,12 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50">
-      <div className="max-w-md mx-auto glass border-t border-border/50 backdrop-blur-xl">
+      <motion.div 
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="max-w-md mx-auto glass border-t border-border/50 backdrop-blur-xl"
+      >
         <div className="flex items-center justify-around px-2 py-2 safe-area-bottom">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
@@ -48,23 +53,34 @@ export function BottomNav() {
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                   />
                 )}
-                <Icon 
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  animate={isActive ? { y: [0, -2, 0] } : {}}
+                  transition={isActive ? { duration: 0.3 } : {}}
+                >
+                  <Icon 
+                    className={cn(
+                      'nav-icon w-5 h-5 transition-all duration-200',
+                      isActive && 'text-primary'
+                    )} 
+                    style={isActive ? { filter: 'drop-shadow(0 0 8px hsl(var(--primary)))' } : {}}
+                  />
+                </motion.div>
+                <motion.span 
                   className={cn(
-                    'nav-icon w-5 h-5 transition-all duration-200',
-                    isActive && 'text-primary scale-110'
-                  )} 
-                />
-                <span className={cn(
-                  'text-[10px] font-medium mt-0.5',
-                  isActive && 'text-primary'
-                )}>
+                    'text-[10px] font-medium mt-0.5',
+                    isActive && 'text-primary'
+                  )}
+                  animate={isActive ? { scale: [1, 1.05, 1] } : {}}
+                >
                   {item.label}
-                </span>
+                </motion.span>
               </Link>
             );
           })}
         </div>
-      </div>
+      </motion.div>
     </nav>
   );
 }
