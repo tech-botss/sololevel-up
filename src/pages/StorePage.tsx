@@ -22,6 +22,20 @@ const categoryLabels: Record<string, string> = {
   frames: '🖼️ Frames',
 };
 
+const itemVariants = {
+  hidden: { opacity: 0, scale: 0.8, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.03,
+      duration: 0.3,
+      ease: 'easeOut' as const,
+    },
+  }),
+};
+
 export default function StorePage() {
   const { user } = useAuth();
   const { 
@@ -110,13 +124,25 @@ export default function StorePage() {
   if (!profile) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-primary">Loading...</div>
+        <motion.div
+          animate={{ rotate: 360, scale: [1, 1.2, 1] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <Sparkles className="w-8 h-8 text-accent" />
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pb-24 px-4 pt-6">
+    <div className="min-h-screen pb-24 px-4 pt-6 relative overflow-hidden">
+      {/* Background glow */}
+      <motion.div 
+        className="fixed top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-[100px] pointer-events-none"
+        animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.5, 0.3] }}
+        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+      />
+
       {/* Header */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
@@ -124,18 +150,41 @@ export default function StorePage() {
         className="flex items-center justify-between mb-4"
       >
         <h1 className="font-display text-2xl font-bold text-foreground">Store</h1>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/20 border border-accent/50">
+        <motion.div 
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/20 border border-accent/50"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          animate={{ boxShadow: ['0 0 10px hsl(var(--accent) / 0.2)', '0 0 20px hsl(var(--accent) / 0.4)', '0 0 10px hsl(var(--accent) / 0.2)'] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
           <Coins className="w-4 h-4 text-accent" />
-          <span className="font-display text-sm font-bold text-accent">{profile.gold.toLocaleString()}</span>
-        </div>
+          <motion.span 
+            key={profile.gold}
+            initial={{ scale: 1.2 }}
+            animate={{ scale: 1 }}
+            className="font-display text-sm font-bold text-accent"
+          >
+            {profile.gold.toLocaleString()}
+          </motion.span>
+        </motion.div>
       </motion.div>
 
       {/* Categories */}
-      <div className="flex gap-2 overflow-x-auto pb-3 mb-4 hide-scrollbar scroll-x touch-pan-x">
-        {categories.map((cat) => (
-          <button
+      <motion.div 
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.1 }}
+        className="flex gap-2 overflow-x-auto pb-3 mb-4 hide-scrollbar scroll-x touch-pan-x"
+      >
+        {categories.map((cat, index) => (
+          <motion.button
             key={cat}
             onClick={() => setActiveCategory(cat)}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: index * 0.05 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             className={cn(
               'px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all flex-shrink-0',
               activeCategory === cat 
@@ -144,12 +193,17 @@ export default function StorePage() {
             )}
           >
             {categoryLabels[cat]}
-          </button>
+          </motion.button>
         ))}
-      </div>
+      </motion.div>
 
       {/* Items Grid */}
-      <div className="grid grid-cols-2 gap-3">
+      <motion.div 
+        className="grid grid-cols-2 gap-3"
+        initial="hidden"
+        animate="visible"
+        key={activeCategory}
+      >
         <AnimatePresence mode="popLayout">
           {displayItems.map((item, index) => {
             const owned = ownedCosmetics.includes(item.id);
@@ -159,20 +213,30 @@ export default function StorePage() {
             return (
               <motion.div
                 key={item.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ delay: index * 0.02 }}
+                custom={index}
+                variants={itemVariants}
+                initial="hidden"
+                animate="visible"
+                exit={{ opacity: 0, scale: 0.8 }}
+                whileHover={{ 
+                  y: -4, 
+                  boxShadow: equipped 
+                    ? '0 10px 40px -10px hsl(var(--primary) / 0.5)' 
+                    : '0 10px 30px -10px hsl(var(--primary) / 0.3)',
+                  transition: { duration: 0.2 }
+                }}
                 className={cn(
-                  'card-game p-3 relative overflow-hidden transition-all duration-300',
+                  'card-game p-3 relative overflow-hidden cursor-pointer',
                   equipped && 'ring-2 ring-primary ring-offset-1 ring-offset-background',
                   locked && 'opacity-60'
                 )}
                 onClick={() => setSelectedItem(item)}
               >
                 {/* Item Preview */}
-                <div className="flex justify-center mb-3">
+                <motion.div 
+                  className="flex justify-center mb-3"
+                  whileHover={{ scale: 1.05 }}
+                >
                   {item.category === 'avatars' ? (
                     <AvatarPreview
                       avatarId={item.id}
@@ -194,7 +258,7 @@ export default function StorePage() {
                       size="lg"
                     />
                   )}
-                </div>
+                </motion.div>
                 
                 {/* Item Info */}
                 <h3 className="font-semibold text-sm text-foreground truncate text-center">
@@ -203,12 +267,15 @@ export default function StorePage() {
                 
                 {/* Rarity Badge */}
                 <div className="flex justify-center mt-1">
-                  <span className={cn(
-                    'text-[10px] px-2 py-0.5 rounded-full capitalize',
-                    `badge-rarity-${item.rarity}`
-                  )}>
+                  <motion.span 
+                    className={cn(
+                      'text-[10px] px-2 py-0.5 rounded-full capitalize',
+                      `badge-rarity-${item.rarity}`
+                    )}
+                    whileHover={{ scale: 1.1 }}
+                  >
                     {item.rarity}
-                  </span>
+                  </motion.span>
                 </div>
                 
                 {/* Price / Status */}
@@ -229,33 +296,36 @@ export default function StorePage() {
                     </span>
                   )}
                   
-                  <Button
-                    size="sm"
-                    variant={equipped ? 'secondary' : owned ? 'outline' : 'default'}
-                    disabled={locked}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handlePurchase(item);
-                    }}
-                    className="h-7 text-xs px-3"
-                  >
-                    {equipped ? (
-                      <Check className="w-3 h-3" />
-                    ) : owned ? (
-                      'Equip'
-                    ) : locked ? (
-                      <Lock className="w-3 h-3" />
-                    ) : (
-                      'Get'
-                    )}
-                  </Button>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      size="sm"
+                      variant={equipped ? 'secondary' : owned ? 'outline' : 'default'}
+                      disabled={locked}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePurchase(item);
+                      }}
+                      className="h-7 text-xs px-3"
+                    >
+                      {equipped ? (
+                        <Check className="w-3 h-3" />
+                      ) : owned ? (
+                        'Equip'
+                      ) : locked ? (
+                        <Lock className="w-3 h-3" />
+                      ) : (
+                        'Get'
+                      )}
+                    </Button>
+                  </motion.div>
                 </div>
 
                 {/* Equipped indicator */}
                 {equipped && (
                   <motion.div 
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
                     className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center"
                   >
                     <Sparkles className="w-3 h-3 text-primary-foreground" />
@@ -265,130 +335,189 @@ export default function StorePage() {
             );
           })}
         </AnimatePresence>
-      </div>
+      </motion.div>
 
       {/* Empty State */}
       {displayItems.length === 0 && (
-        <div className="text-center py-12">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center py-12"
+        >
+          <motion.div
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <Sparkles className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
+          </motion.div>
           <p className="text-muted-foreground">No items in this category</p>
-        </div>
+        </motion.div>
       )}
 
       {/* Item Detail Modal */}
       <AnimatePresence>
         {selectedItem && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-end justify-center"
-            onClick={() => setSelectedItem(null)}
-          >
+          <>
             <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25 }}
-              className="w-full max-w-md bg-card border-t border-border rounded-t-3xl p-6"
-              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50"
+              onClick={() => setSelectedItem(null)}
+            />
+            <motion.div
+              initial={{ y: '100%', opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed inset-x-0 bottom-0 z-50 flex items-end justify-center"
+              onClick={() => setSelectedItem(null)}
             >
-              <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-6" />
-              
-              <div className="flex flex-col items-center">
-                {/* Large Preview */}
-                {selectedItem.category === 'avatars' ? (
-                  <AvatarPreview
-                    avatarId={selectedItem.id}
-                    name={selectedItem.name}
-                    rarity={selectedItem.rarity as 'common' | 'uncommon' | 'rare' | 'legendary'}
-                    gender={selectedItem.gender}
-                    size="xl"
-                    isLocked={isLocked(selectedItem)}
-                    isEquipped={isEquipped(selectedItem)}
-                    showGlow
-                  />
-                ) : selectedItem.category === 'auras' ? (
-                  <AuraEffect type={getAuraTypeFromId(selectedItem.id)} size="xl">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-muted to-card flex items-center justify-center">
-                      <span className="text-4xl">✨</span>
-                    </div>
-                  </AuraEffect>
-                ) : (
-                  <CosmeticPreview
-                    category={selectedItem.category}
-                    name={selectedItem.name}
-                    rarity={selectedItem.rarity as 'common' | 'uncommon' | 'rare' | 'legendary'}
-                    size="lg"
-                  />
-                )}
+              <motion.div
+                className="w-full max-w-md bg-card border-t border-border rounded-t-3xl p-6"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <motion.div 
+                  className="w-12 h-1 bg-muted rounded-full mx-auto mb-6"
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ delay: 0.2 }}
+                />
                 
-                <h2 className="font-display text-xl font-bold text-foreground mt-4">
-                  {selectedItem.name}
-                </h2>
-                
-                <span className={cn(
-                  'text-xs px-3 py-1 rounded-full capitalize mt-2',
-                  `badge-rarity-${selectedItem.rarity}`
-                )}>
-                  {selectedItem.rarity}
-                </span>
-                
-                <p className="text-sm text-muted-foreground text-center mt-3 px-4">
-                  {selectedItem.description}
-                </p>
-                
-                {/* Action Button */}
-                <div className="w-full mt-6">
-                  {isLocked(selectedItem) ? (
-                    <Button disabled className="w-full" size="lg">
-                      <Lock className="w-4 h-4 mr-2" />
-                      Reach Level {selectedItem.unlockLevel}
-                    </Button>
-                  ) : ownedCosmetics.includes(selectedItem.id) ? (
-                    <Button 
-                      className="w-full" 
-                      size="lg"
-                      variant={isEquipped(selectedItem) ? 'secondary' : 'default'}
-                      onClick={() => {
-                        handlePurchase(selectedItem);
-                        setSelectedItem(null);
-                      }}
-                    >
-                      {isEquipped(selectedItem) ? (
-                        <>
-                          <Check className="w-4 h-4 mr-2" />
-                          Currently Equipped
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-4 h-4 mr-2" />
-                          Equip Now
-                        </>
-                      )}
-                    </Button>
-                  ) : (
-                    <Button 
-                      className="w-full" 
-                      size="lg"
-                      onClick={() => {
-                        handlePurchase(selectedItem);
-                        setSelectedItem(null);
-                      }}
-                    >
-                      {selectedItem.price === 0 ? (
-                        'Claim for Free'
-                      ) : (
-                        <>
-                          <Coins className="w-4 h-4 mr-2" />
-                          Purchase for {selectedItem.price.toLocaleString()} Gold
-                        </>
-                      )}
-                    </Button>
-                  )}
-                </div>
-              </div>
+                <motion.div 
+                  className="flex flex-col items-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  {/* Large Preview */}
+                  <motion.div
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 200 }}
+                  >
+                    {selectedItem.category === 'avatars' ? (
+                      <AvatarPreview
+                        avatarId={selectedItem.id}
+                        name={selectedItem.name}
+                        rarity={selectedItem.rarity as 'common' | 'uncommon' | 'rare' | 'legendary'}
+                        gender={selectedItem.gender}
+                        size="xl"
+                        isLocked={isLocked(selectedItem)}
+                        isEquipped={isEquipped(selectedItem)}
+                        showGlow
+                      />
+                    ) : selectedItem.category === 'auras' ? (
+                      <AuraEffect type={getAuraTypeFromId(selectedItem.id)} size="xl">
+                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-muted to-card flex items-center justify-center">
+                          <span className="text-4xl">✨</span>
+                        </div>
+                      </AuraEffect>
+                    ) : (
+                      <CosmeticPreview
+                        category={selectedItem.category}
+                        name={selectedItem.name}
+                        rarity={selectedItem.rarity as 'common' | 'uncommon' | 'rare' | 'legendary'}
+                        size="lg"
+                      />
+                    )}
+                  </motion.div>
+                  
+                  <motion.h2 
+                    className="font-display text-xl font-bold text-foreground mt-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    {selectedItem.name}
+                  </motion.h2>
+                  
+                  <motion.span 
+                    className={cn(
+                      'text-xs px-3 py-1 rounded-full capitalize mt-2',
+                      `badge-rarity-${selectedItem.rarity}`
+                    )}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.3, type: 'spring' }}
+                  >
+                    {selectedItem.rarity}
+                  </motion.span>
+                  
+                  <motion.p 
+                    className="text-sm text-muted-foreground text-center mt-3 px-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    {selectedItem.description}
+                  </motion.p>
+                  
+                  {/* Action Button */}
+                  <motion.div 
+                    className="w-full mt-6"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    {isLocked(selectedItem) ? (
+                      <Button disabled className="w-full" size="lg">
+                        <Lock className="w-4 h-4 mr-2" />
+                        Reach Level {selectedItem.unlockLevel}
+                      </Button>
+                    ) : ownedCosmetics.includes(selectedItem.id) ? (
+                      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                        <Button 
+                          className="w-full" 
+                          size="lg"
+                          variant={isEquipped(selectedItem) ? 'secondary' : 'default'}
+                          onClick={() => {
+                            handlePurchase(selectedItem);
+                            setSelectedItem(null);
+                          }}
+                        >
+                          {isEquipped(selectedItem) ? (
+                            <>
+                              <Check className="w-4 h-4 mr-2" />
+                              Currently Equipped
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-4 h-4 mr-2" />
+                              Equip Now
+                            </>
+                          )}
+                        </Button>
+                      </motion.div>
+                    ) : (
+                      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                        <Button 
+                          className="w-full relative overflow-hidden group" 
+                          size="lg"
+                          onClick={() => {
+                            handlePurchase(selectedItem);
+                            setSelectedItem(null);
+                          }}
+                        >
+                          <motion.div
+                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-500"
+                          />
+                          {selectedItem.price === 0 ? (
+                            'Claim for Free'
+                          ) : (
+                            <>
+                              <Coins className="w-4 h-4 mr-2" />
+                              Purchase for {selectedItem.price.toLocaleString()} Gold
+                            </>
+                          )}
+                        </Button>
+                      </motion.div>
+                    )}
+                  </motion.div>
+                </motion.div>
+              </motion.div>
             </motion.div>
-          </motion.div>
+          </>
         )}
       </AnimatePresence>
     </div>
