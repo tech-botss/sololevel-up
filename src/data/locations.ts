@@ -591,28 +591,28 @@ export function getCountryByName(name: string): Country | undefined {
 
 export function getStatesByCountry(countryCode: string): State[] {
   const country = getCountryByCode(countryCode);
-  return country?.states || [];
+  return (country?.states || []).slice().sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export function getStatesByCountryName(countryName: string): State[] {
   const country = getCountryByName(countryName);
-  return country?.states || [];
+  return (country?.states || []).slice().sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export function getCitiesByState(countryCode: string, stateCode: string): string[] {
   const states = getStatesByCountry(countryCode);
   const state = states.find(s => s.code === stateCode);
-  return state?.cities || [];
+  return (state?.cities || []).slice().sort((a, b) => a.localeCompare(b));
 }
 
 export function getCitiesByStateName(countryName: string, stateName: string): string[] {
   const country = getCountryByName(countryName);
   const state = country?.states.find(s => s.name === stateName);
-  return state?.cities || [];
+  return (state?.cities || []).slice().sort((a, b) => a.localeCompare(b));
 }
 
 export function getAllCountryNames(): string[] {
-  return countries.map(c => c.name);
+  return countries.map(c => c.name).sort((a, b) => a.localeCompare(b));
 }
 
 // Country flag emojis mapping
