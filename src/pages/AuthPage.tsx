@@ -478,29 +478,85 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 overflow-y-auto">
-      {/* Background effects */}
+      {/* Animated Background effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/20 rounded-full blur-[100px]" />
-        <div className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-secondary/20 rounded-full blur-[80px]" />
+        <motion.div 
+          className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/20 rounded-full blur-[100px]"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.2, 0.3, 0.2],
+          }}
+          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div 
+          className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-secondary/20 rounded-full blur-[80px]"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            opacity: [0.2, 0.4, 0.2],
+          }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div 
+          className="absolute top-1/3 right-1/4 w-48 h-48 bg-accent/10 rounded-full blur-[60px]"
+          animate={{
+            scale: [1, 1.3, 1],
+            x: [0, 20, 0],
+          }}
+          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+        />
       </div>
 
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 30, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
         className="relative z-10 w-full max-w-sm"
       >
-        {/* Logo */}
-        <div className="text-center mb-6">
-          <h1 className="font-display text-4xl font-bold gradient-text mb-1">SoloRank</h1>
-          <p className="text-muted-foreground text-sm">Rise through the ranks</p>
-        </div>
+        {/* Animated Logo */}
+        <motion.div 
+          className="text-center mb-6"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
+          <motion.h1 
+            className="font-display text-4xl font-bold gradient-text mb-1"
+            animate={{ 
+              backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+            }}
+            transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
+            style={{ 
+              backgroundSize: '200% 200%',
+              backgroundImage: 'linear-gradient(90deg, hsl(var(--primary)), hsl(var(--secondary)), hsl(var(--primary)))',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
+          >
+            SoloRank
+          </motion.h1>
+          <motion.p 
+            className="text-muted-foreground text-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            Rise through the ranks
+          </motion.p>
+        </motion.div>
 
-        {/* Auth Card */}
-        <div className="card-game-glow p-5">
+        {/* Auth Card with glow animation */}
+        <motion.div 
+          className="card-game-glow p-5"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          whileHover={{ boxShadow: '0 0 40px hsl(var(--primary) / 0.3)' }}
+        >
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as AuthTab)}>
             <TabsList className="grid w-full grid-cols-2 mb-5">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="register">Register</TabsTrigger>
+              <TabsTrigger value="login" className="data-[state=active]:animate-scale-in">Login</TabsTrigger>
+              <TabsTrigger value="register" className="data-[state=active]:animate-scale-in">Register</TabsTrigger>
             </TabsList>
 
             {/* LOGIN TAB */}
@@ -960,7 +1016,7 @@ export default function AuthPage() {
               </AnimatePresence>
             </TabsContent>
           </Tabs>
-        </div>
+        </motion.div>
 
         <p className="text-xs text-muted-foreground text-center mt-4">
           By continuing, you agree to our Terms & Privacy Policy
