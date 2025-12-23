@@ -64,7 +64,8 @@ export default function AuthPage() {
   useEffect(() => {
     if (country) {
       const countryData = countries.find(l => l.name === country);
-      setStates(countryData?.states.map(s => s.name) || []);
+      const stateNames = countryData?.states.map(s => s.name) || [];
+      setStates(stateNames.slice().sort((a, b) => a.localeCompare(b)));
       setState('');
       setCity('');
       setCities([]);
@@ -76,7 +77,8 @@ export default function AuthPage() {
     if (country && state) {
       const countryData = countries.find(l => l.name === country);
       const stateData = countryData?.states.find(s => s.name === state);
-      setCities(stateData?.cities || []);
+      const cityNames = stateData?.cities || [];
+      setCities(cityNames.slice().sort((a, b) => a.localeCompare(b)));
       setCity('');
     }
   }, [country, state]);
@@ -835,7 +837,7 @@ export default function AuthPage() {
                           <SelectValue placeholder="Country" />
                         </SelectTrigger>
                         <SelectContent>
-                          {countries.map(c => (
+                          {[...countries].sort((a, b) => a.name.localeCompare(b.name)).map(c => (
                             <SelectItem key={c.code} value={c.name}>{c.name}</SelectItem>
                           ))}
                         </SelectContent>
