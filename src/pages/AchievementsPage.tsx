@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { Sparkles, Trophy, Lock, Star, Target, Info, X } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Achievement } from '@/types/game';
+import { AchievementsPageSkeleton } from '@/components/skeletons';
 
 const filters = ['all', 'unlocked', 'locked'];
 const categories = ['all', 'easy', 'medium', 'hard', 'very_hard'];
@@ -46,9 +47,11 @@ export default function AchievementsPage() {
   const [category, setCategory] = useState('all');
   const [unlockedAchievements, setUnlockedAchievements] = useState<string[]>([]);
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
+      setIsLoading(true);
       supabase
         .from('user_achievements')
         .select('achievement_id')
@@ -57,9 +60,16 @@ export default function AchievementsPage() {
           if (data) {
             setUnlockedAchievements(data.map(a => a.achievement_id));
           }
+          setIsLoading(false);
         });
+    } else {
+      setIsLoading(false);
     }
   }, [user]);
+
+  if (isLoading) {
+    return <AchievementsPageSkeleton />;
+  }
 
   const filtered = achievements.filter(a => {
     const matchesFilter = filter === 'all' 

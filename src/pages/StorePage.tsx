@@ -10,6 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import { AvatarPreview, CosmeticPreview } from '@/components/AvatarPreview';
 import { AuraPreview, AuraEffect, getAuraTypeFromId } from '@/components/AuraEffect';
 import { Cosmetic } from '@/types/game';
+import { StorePageSkeleton } from '@/components/skeletons';
 
 const categories = ['avatars', 'outfits', 'weapons', 'auras', 'name_colors', 'frames'];
 
@@ -122,16 +123,7 @@ export default function StorePage() {
   };
 
   if (!profile) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <motion.div
-          animate={{ rotate: 360, scale: [1, 1.2, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <Sparkles className="w-8 h-8 text-accent" />
-        </motion.div>
-      </div>
-    );
+    return <StorePageSkeleton />;
   }
 
   return (
