@@ -298,7 +298,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      accept_friend_request: { Args: { request_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

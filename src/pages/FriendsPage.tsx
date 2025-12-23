@@ -150,24 +150,15 @@ export default function FriendsPage() {
   const acceptRequest = async (request: FriendRequest) => {
     if (!user) return;
     
-    // Add both friendship directions
-    const { error: friendError } = await supabase
-      .from('friends')
-      .insert([
-        { user_id: user.id, friend_id: request.from_user_id },
-        { user_id: request.from_user_id, friend_id: user.id }
-      ]);
+    // Use database function to handle friend acceptance (bypasses RLS for bidirectional insert)
+    const { data, error } = await supabase.rpc('accept_friend_request', {
+      request_id: request.id
+    });
     
-    if (friendError) {
+    if (error || !data) {
       toast({ title: 'Failed to accept request', variant: 'destructive' });
       return;
     }
-    
-    // Delete the request
-    await supabase
-      .from('friend_requests')
-      .delete()
-      .eq('id', request.id);
     
     toast({ title: 'Friend added!' });
     fetchFriends();
