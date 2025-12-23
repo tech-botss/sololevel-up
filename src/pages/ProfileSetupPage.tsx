@@ -36,7 +36,8 @@ export default function ProfileSetupPage() {
   useEffect(() => {
     if (country) {
       const countryData = countries.find(l => l.name === country);
-      setStates(countryData?.states.map(s => s.name) || []);
+      const stateNames = countryData?.states.map(s => s.name) || [];
+      setStates(stateNames.slice().sort((a, b) => a.localeCompare(b)));
       setState('');
       setCity('');
       setCities([]);
@@ -48,7 +49,8 @@ export default function ProfileSetupPage() {
     if (country && state) {
       const countryData = countries.find(l => l.name === country);
       const stateData = countryData?.states.find(s => s.name === state);
-      setCities(stateData?.cities || []);
+      const cityNames = stateData?.cities || [];
+      setCities(cityNames.slice().sort((a, b) => a.localeCompare(b)));
       setCity('');
     }
   }, [country, state]);
@@ -215,7 +217,7 @@ export default function ProfileSetupPage() {
                 <SelectValue placeholder="Select country" />
               </SelectTrigger>
               <SelectContent>
-                {countries.map(loc => (
+                {[...countries].sort((a, b) => a.name.localeCompare(b.name)).map(loc => (
                   <SelectItem key={loc.code} value={loc.name}>
                     {loc.name}
                   </SelectItem>
