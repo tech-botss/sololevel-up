@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Trophy, Flame, Target, Coins, MapPin, Settings, Sparkles, TrendingUp, Zap, Award, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CountUp } from '@/components/animations';
+import { ProfilePageSkeleton } from '@/components/skeletons';
 
 const statCardVariants = {
   hidden: { opacity: 0, y: 30, scale: 0.9, rotateX: -15 },
@@ -47,29 +48,7 @@ export default function ProfilePage() {
   }, [user, profile, fetchProfile]);
 
   if (!profile) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <motion.div
-          className="flex flex-col items-center gap-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
-          <motion.div
-            animate={{ rotate: 360, scale: [1, 1.2, 1] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <Sparkles className="w-10 h-10 text-primary" />
-          </motion.div>
-          <motion.p 
-            className="text-muted-foreground"
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            Loading profile...
-          </motion.p>
-        </motion.div>
-      </div>
-    );
+    return <ProfilePageSkeleton />;
   }
 
   const stats = {
