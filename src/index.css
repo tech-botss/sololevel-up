@@ -23,101 +23,104 @@
 @tailwind components;
 @tailwind utilities;
 
-/* SoloRank Design System - Solo Leveling Inspired Dark Theme */
+/* SoloRank Design System - ULTIMATE GAMING THEME */
 
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @layer base {
   :root {
-    /* Core Dark Theme */
-    --background: 222 47% 4%;
-    --foreground: 220 13% 91%;
+    /* Core Ultra-Dark Theme */
+    --background: 230 25% 3%;
+    --foreground: 220 20% 95%;
 
-    /* Card & Surfaces */
-    --card: 222 47% 7%;
-    --card-foreground: 220 13% 91%;
-    --card-elevated: 222 47% 10%;
+    /* Card & Surfaces - Deep with glow potential */
+    --card: 230 30% 6%;
+    --card-foreground: 220 20% 95%;
+    --card-elevated: 230 30% 9%;
 
-    --popover: 222 47% 8%;
-    --popover-foreground: 220 13% 91%;
+    --popover: 230 30% 5%;
+    --popover-foreground: 220 20% 95%;
 
-    /* Primary - Cyan (Solo Leveling blue glow) */
-    --primary: 189 94% 53%;
-    --primary-foreground: 222 47% 4%;
-    --primary-glow: 189 94% 63%;
+    /* Primary - Electric Cyan (Enhanced glow) */
+    --primary: 185 100% 50%;
+    --primary-foreground: 230 25% 3%;
+    --primary-glow: 185 100% 65%;
 
-    /* Secondary - Violet (Shadow Monarch purple) */
-    --secondary: 263 70% 50%;
-    --secondary-foreground: 220 13% 95%;
-    --secondary-glow: 263 70% 60%;
+    /* Secondary - Neon Violet (Shadow Monarch) */
+    --secondary: 270 85% 55%;
+    --secondary-foreground: 220 20% 95%;
+    --secondary-glow: 270 85% 70%;
 
-    /* Accent - Gold (rewards & achievements) */
-    --accent: 43 74% 49%;
-    --accent-foreground: 222 47% 4%;
-    --accent-glow: 43 90% 60%;
+    /* Accent - Holographic Gold */
+    --accent: 45 95% 55%;
+    --accent-foreground: 230 25% 3%;
+    --accent-glow: 45 100% 70%;
 
-    /* Muted */
-    --muted: 220 14% 15%;
-    --muted-foreground: 220 9% 56%;
+    /* Muted - Deep space */
+    --muted: 230 20% 12%;
+    --muted-foreground: 220 15% 55%;
 
-    /* Destructive */
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 220 13% 95%;
+    /* Destructive - Neon Red */
+    --destructive: 0 90% 55%;
+    --destructive-foreground: 220 20% 95%;
 
     /* Borders & Inputs */
-    --border: 220 14% 20%;
-    --input: 220 14% 15%;
-    --ring: 189 94% 53%;
+    --border: 230 25% 18%;
+    --input: 230 20% 10%;
+    --ring: 185 100% 50%;
 
     /* Radius */
     --radius: 0.75rem;
 
-    /* Stat Colors */
-    --stat-str: 0 85% 60%;
-    --stat-int: 217 91% 60%;
-    --stat-end: 142 71% 45%;
-    --stat-wil: 263 70% 50%;
-    --stat-soc: 43 74% 49%;
+    /* Stat Colors - More vibrant */
+    --stat-str: 0 95% 60%;
+    --stat-int: 210 100% 60%;
+    --stat-end: 145 85% 50%;
+    --stat-wil: 270 85% 60%;
+    --stat-soc: 45 95% 55%;
 
-    /* Rarity Colors */
-    --rarity-common: 220 9% 56%;
-    --rarity-uncommon: 142 71% 45%;
-    --rarity-rare: 217 91% 60%;
-    --rarity-legendary: 43 74% 49%;
+    /* Rarity Colors - Holographic feel */
+    --rarity-common: 220 15% 55%;
+    --rarity-uncommon: 145 85% 50%;
+    --rarity-rare: 210 100% 60%;
+    --rarity-legendary: 45 95% 55%;
 
     /* Difficulty Colors */
-    --difficulty-easy: 142 71% 45%;
-    --difficulty-medium: 43 74% 49%;
-    --difficulty-hard: 0 85% 60%;
+    --difficulty-easy: 145 85% 50%;
+    --difficulty-medium: 45 95% 55%;
+    --difficulty-hard: 0 95% 55%;
 
     /* Status Colors */
-    --online: 142 71% 45%;
-    --offline: 220 9% 40%;
-    --warning: 38 92% 50%;
+    --online: 145 85% 50%;
+    --offline: 220 15% 40%;
+    --warning: 38 100% 55%;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(189 94% 53%) 0%, hsl(217 91% 60%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(263 70% 50%) 0%, hsl(189 94% 53%) 100%);
-    --gradient-gold: linear-gradient(135deg, hsl(43 74% 49%) 0%, hsl(38 92% 60%) 100%);
-    --gradient-dark: linear-gradient(180deg, hsl(222 47% 7%) 0%, hsl(222 47% 4%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(222 47% 10%) 0%, hsl(222 47% 6%) 100%);
-    --gradient-xp: linear-gradient(90deg, hsl(189 94% 53%) 0%, hsl(263 70% 50%) 50%, hsl(189 94% 53%) 100%);
+    /* Enhanced Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(185 100% 50%) 0%, hsl(210 100% 60%) 50%, hsl(270 85% 55%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(270 85% 55%) 0%, hsl(185 100% 50%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(45 95% 55%) 0%, hsl(38 100% 60%) 50%, hsl(45 95% 45%) 100%);
+    --gradient-dark: linear-gradient(180deg, hsl(230 30% 8%) 0%, hsl(230 25% 3%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(230 30% 8%) 0%, hsl(230 25% 4%) 100%);
+    --gradient-xp: linear-gradient(90deg, hsl(185 100% 50%) 0%, hsl(270 85% 55%) 50%, hsl(185 100% 50%) 100%);
+    --gradient-holographic: linear-gradient(135deg, hsl(185 100% 50% / 0.3) 0%, hsl(270 85% 55% / 0.3) 25%, hsl(45 95% 55% / 0.3) 50%, hsl(185 100% 50% / 0.3) 75%, hsl(270 85% 55% / 0.3) 100%);
+    --gradient-iridescent: linear-gradient(45deg, hsl(185 100% 50% / 0.1) 0%, hsl(270 85% 55% / 0.15) 33%, hsl(45 95% 55% / 0.1) 66%, hsl(185 100% 50% / 0.1) 100%);
 
-    /* Shadows */
-    --shadow-glow-primary: 0 0 30px hsl(189 94% 53% / 0.3);
-    --shadow-glow-secondary: 0 0 30px hsl(263 70% 50% / 0.3);
-    --shadow-glow-gold: 0 0 30px hsl(43 74% 49% / 0.3);
-    --shadow-card: 0 4px 24px hsl(222 47% 2% / 0.5);
+    /* Enhanced Shadows */
+    --shadow-glow-primary: 0 0 40px hsl(185 100% 50% / 0.4), 0 0 80px hsl(185 100% 50% / 0.2);
+    --shadow-glow-secondary: 0 0 40px hsl(270 85% 55% / 0.4), 0 0 80px hsl(270 85% 55% / 0.2);
+    --shadow-glow-gold: 0 0 40px hsl(45 95% 55% / 0.4), 0 0 80px hsl(45 95% 55% / 0.2);
+    --shadow-card: 0 8px 32px hsl(230 25% 2% / 0.6), 0 0 1px hsl(185 100% 50% / 0.1);
+    --shadow-neon: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 40px currentColor;
 
-    /* Sidebar (not used much in mobile but keeping for compatibility) */
-    --sidebar-background: 222 47% 6%;
-    --sidebar-foreground: 220 13% 91%;
-    --sidebar-primary: 189 94% 53%;
-    --sidebar-primary-foreground: 222 47% 4%;
-    --sidebar-accent: 222 47% 12%;
-    --sidebar-accent-foreground: 220 13% 91%;
-    --sidebar-border: 220 14% 20%;
-    --sidebar-ring: 189 94% 53%;
+    /* Sidebar */
+    --sidebar-background: 230 30% 5%;
+    --sidebar-foreground: 220 20% 95%;
+    --sidebar-primary: 185 100% 50%;
+    --sidebar-primary-foreground: 230 25% 3%;
+    --sidebar-accent: 230 30% 10%;
+    --sidebar-accent-foreground: 220 20% 95%;
+    --sidebar-border: 230 25% 18%;
+    --sidebar-ring: 185 100% 50%;
   }
 }
 
@@ -133,9 +136,35 @@
   body {
     @apply bg-background text-foreground antialiased;
     background-image: 
-      radial-gradient(ellipse at top, hsl(222 47% 8%) 0%, transparent 50%),
-      radial-gradient(ellipse at bottom, hsl(263 70% 8% / 0.3) 0%, transparent 50%);
+      radial-gradient(ellipse at 20% 0%, hsl(185 100% 50% / 0.08) 0%, transparent 40%),
+      radial-gradient(ellipse at 80% 10%, hsl(270 85% 55% / 0.08) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 100%, hsl(270 85% 55% / 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 0% 50%, hsl(185 100% 50% / 0.03) 0%, transparent 40%);
     min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        hsl(185 100% 50% / 0.01) 2px,
+        hsl(185 100% 50% / 0.01) 4px
+      );
+    pointer-events: none;
+    z-index: 9999;
+    animation: scanlines 8s linear infinite;
+  }
+
+  @keyframes scanlines {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(4px); }
   }
 
   /* Custom scrollbar */
@@ -158,34 +187,106 @@
 }
 
 @layer components {
-  /* Typography */
+  /* Typography with neon effects */
   .font-display {
     font-family: 'Orbitron', sans-serif;
+    letter-spacing: 0.02em;
   }
 
   .text-glow {
-    text-shadow: 0 0 20px hsl(var(--primary) / 0.5);
+    text-shadow: 
+      0 0 10px hsl(var(--primary) / 0.8),
+      0 0 20px hsl(var(--primary) / 0.5),
+      0 0 40px hsl(var(--primary) / 0.3);
   }
 
   .text-glow-gold {
-    text-shadow: 0 0 20px hsl(var(--accent) / 0.5);
+    text-shadow: 
+      0 0 10px hsl(var(--accent) / 0.8),
+      0 0 20px hsl(var(--accent) / 0.5),
+      0 0 40px hsl(var(--accent) / 0.3);
   }
 
   .text-glow-secondary {
-    text-shadow: 0 0 20px hsl(var(--secondary) / 0.5);
+    text-shadow: 
+      0 0 10px hsl(var(--secondary) / 0.8),
+      0 0 20px hsl(var(--secondary) / 0.5),
+      0 0 40px hsl(var(--secondary) / 0.3);
   }
 
-  /* Glass morphism */
+  .text-neon {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 10px hsl(var(--primary) / 0.5));
+  }
+
+  .text-shimmer {
+    background: linear-gradient(
+      90deg, 
+      hsl(var(--foreground)) 0%, 
+      hsl(var(--primary)) 25%, 
+      hsl(var(--secondary)) 50%,
+      hsl(var(--primary)) 75%,
+      hsl(var(--foreground)) 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: text-shimmer 3s linear infinite;
+  }
+
+  /* Enhanced Glass morphism */
   .glass {
-    background: hsl(var(--card) / 0.8);
-    backdrop-filter: blur(12px);
-    border: 1px solid hsl(var(--border) / 0.5);
+    background: hsl(var(--card) / 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid hsl(var(--primary) / 0.15);
+    box-shadow: 
+      inset 0 1px 0 hsl(var(--primary) / 0.1),
+      0 0 20px hsl(var(--primary) / 0.05);
   }
 
   .glass-elevated {
-    background: hsl(var(--card-elevated) / 0.9);
-    backdrop-filter: blur(16px);
-    border: 1px solid hsl(var(--primary) / 0.2);
+    background: hsl(var(--card-elevated) / 0.85);
+    backdrop-filter: blur(24px) saturate(200%);
+    border: 1px solid hsl(var(--primary) / 0.25);
+    box-shadow: 
+      inset 0 1px 0 hsl(var(--primary) / 0.15),
+      0 0 30px hsl(var(--primary) / 0.1),
+      0 8px 32px hsl(0 0% 0% / 0.4);
+  }
+
+  .glass-holographic {
+    background: linear-gradient(135deg, 
+      hsl(var(--card) / 0.8) 0%, 
+      hsl(var(--card-elevated) / 0.9) 50%,
+      hsl(var(--card) / 0.8) 100%
+    );
+    backdrop-filter: blur(24px) saturate(200%);
+    border: 1px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+  }
+
+  .glass-holographic::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--gradient-holographic);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: holographic-shift 4s linear infinite;
+  }
+
+  @keyframes holographic-shift {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
   }
 
   /* Glow effects */
@@ -201,17 +302,53 @@
     box-shadow: var(--shadow-glow-gold);
   }
 
-  /* Card styles */
+  /* Enhanced Card styles */
   .card-game {
-    @apply rounded-xl border border-border/50 bg-card;
+    @apply rounded-xl border border-border/30 bg-card relative overflow-hidden;
     background: var(--gradient-card);
     box-shadow: var(--shadow-card);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card-game::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-iridescent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  .card-game:hover::before {
+    opacity: 1;
+  }
+
+  .card-game:hover {
+    border-color: hsl(var(--primary) / 0.4);
+    box-shadow: var(--shadow-card), 0 0 30px hsl(var(--primary) / 0.15);
+    transform: translateY(-2px);
   }
 
   .card-game-glow {
     @apply card-game;
-    border-color: hsl(var(--primary) / 0.3);
+    border-color: hsl(var(--primary) / 0.4);
     box-shadow: var(--shadow-card), var(--shadow-glow-primary);
+  }
+
+  .card-game-glow::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.3), transparent);
+    border-radius: inherit;
+    z-index: -1;
+    animation: border-glow 3s linear infinite;
+  }
+
+  @keyframes border-glow {
+    0%, 100% { opacity: 0.5; transform: translateX(-100%); }
+    50% { opacity: 1; transform: translateX(100%); }
   }
 
   /* Button base styles */

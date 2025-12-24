@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { UserPlus, MessageCircle, Search, X, Check, Clock, UserMinus } from 'lucide-react';
+import { UserPlus, Search, X, Check, Clock, UserMinus, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
 
 interface Friend {
   id: string;
@@ -30,6 +30,7 @@ interface FriendRequest {
 
 export default function FriendsPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [friends, setFriends] = useState<Friend[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -264,13 +265,26 @@ export default function FriendsPage() {
               transition={{ delay: index * 0.05 }}
               className="card-game p-4 flex items-center gap-3"
             >
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+              <div 
+                className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
+                onClick={() => navigate(`/friends/${friend.id}`)}
+              >
                 <span className="font-bold text-primary-foreground">{friend.username.slice(0, 2).toUpperCase()}</span>
               </div>
-              <div className="flex-1">
-                <p className="font-semibold text-foreground">{friend.username}</p>
+              <div 
+                className="flex-1 cursor-pointer"
+                onClick={() => navigate(`/friends/${friend.id}`)}
+              >
+                <p className="font-semibold text-foreground hover:text-primary transition-colors">{friend.username}</p>
                 <p className="text-xs text-muted-foreground">Level {friend.level} • {friend.active_title || 'Hunter'}</p>
               </div>
+              <Button 
+                size="sm" 
+                variant="ghost"
+                onClick={() => navigate(`/friends/${friend.id}`)}
+              >
+                <Eye className="w-4 h-4" />
+              </Button>
               <Button 
                 size="sm" 
                 variant="ghost"

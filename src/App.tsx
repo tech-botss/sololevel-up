@@ -14,6 +14,7 @@ import QuestsPage from "./pages/QuestsPage";
 import ProfilePage from "./pages/ProfilePage";
 import LeaderboardsPage from "./pages/LeaderboardsPage";
 import FriendsPage from "./pages/FriendsPage";
+import FriendProfilePage from "./pages/FriendProfilePage";
 import StorePage from "./pages/StorePage";
 import AchievementsPage from "./pages/AchievementsPage";
 import NotFound from "./pages/NotFound";
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/profile/edit" element={<ProtectedRoute><ProfileEditPage /></ProtectedRoute>} />
               <Route path="/leaderboards" element={<ProtectedRoute><LeaderboardsPage /></ProtectedRoute>} />
               <Route path="/friends" element={<ProtectedRoute><FriendsPage /></ProtectedRoute>} />
+              <Route path="/friends/:friendId" element={<ProtectedRoute><FriendProfilePage /></ProtectedRoute>} />
               <Route path="/store" element={<ProtectedRoute><StorePage /></ProtectedRoute>} />
               <Route path="/achievements" element={<ProtectedRoute><AchievementsPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
