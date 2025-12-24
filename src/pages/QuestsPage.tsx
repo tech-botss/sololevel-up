@@ -3,13 +3,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/gameStore';
 import { predefinedQuests } from '@/data/quests';
 import { Quest, QuestCategory } from '@/types/game';
-import { Clock, Zap, Coins, Play, Plus, Pause, X, CheckCircle, Sparkles } from 'lucide-react';
+import { Clock, Zap, Coins, Play, Plus, Pause, X, CheckCircle, Sparkles, Code, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { CustomQuestBuilder } from '@/components/CustomQuestBuilder';
+import { DeveloperQuestBuilder } from '@/components/DeveloperQuestBuilder';
 import { CurrentDateTime } from '@/components/CurrentDateTime';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
+import { useDeveloperRole } from '@/hooks/useDeveloperRole';
+import { useCommunityQuests } from '@/hooks/useCommunityQuests';
 
 const categories: { id: QuestCategory | 'all'; label: string }[] = [
   { id: 'all', label: 'All' },
@@ -38,9 +41,12 @@ export default function QuestsPage() {
   const { activeQuest, startQuest, pauseQuest, resumeQuest, abandonQuest, completeQuest, updateQuestTimer } = useGameStore();
   const [selectedCategory, setSelectedCategory] = useState<QuestCategory | 'all'>('all');
   const [showQuestBuilder, setShowQuestBuilder] = useState(false);
+  const [showDevQuestBuilder, setShowDevQuestBuilder] = useState(false);
   const [customQuests, setCustomQuests] = useState<Quest[]>([]);
+  const { isDeveloper } = useDeveloperRole();
+  const { communityQuests, refetch: refetchCommunityQuests } = useCommunityQuests();
 
-  const allQuests = [...customQuests, ...predefinedQuests];
+  const allQuests = [...customQuests, ...communityQuests, ...predefinedQuests];
   const filteredQuests = selectedCategory === 'all' 
     ? allQuests 
     : allQuests.filter(q => q.category === selectedCategory);
@@ -120,25 +126,49 @@ export default function QuestsPage() {
         >
           Quests
         </motion.h1>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Button
-            onClick={() => setShowQuestBuilder(true)}
-            size="sm"
-            className="gap-2 relative overflow-hidden group"
-          >
+        <div className="flex items-center gap-2">
+          {isDeveloper && (
             <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"
-            />
-            <Plus className="w-4 h-4" />
-            Create
-          </Button>
-        </motion.div>
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                onClick={() => setShowDevQuestBuilder(true)}
+                size="sm"
+                variant="outline"
+                className="gap-2 relative overflow-hidden group border-secondary text-secondary hover:bg-secondary/10"
+              >
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-secondary/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"
+                />
+                <Code className="w-4 h-4" />
+                Dev Quest
+              </Button>
+            </motion.div>
+          )}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Button
+              onClick={() => setShowQuestBuilder(true)}
+              size="sm"
+              className="gap-2 relative overflow-hidden group"
+            >
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"
+              />
+              <Plus className="w-4 h-4" />
+              Create
+            </Button>
+          </motion.div>
+        </div>
       </div>
 
       {/* Active Quest Card */}
@@ -364,6 +394,7 @@ export default function QuestsPage() {
       >
         {filteredQuests.map((quest, index) => {
           const isCustom = quest.id.startsWith('custom-');
+          const isCommunity = quest.id.startsWith('community-');
           return (
             <motion.div
               key={quest.id}
@@ -378,12 +409,13 @@ export default function QuestsPage() {
               }}
               className={cn(
                 'card-game p-4 cursor-pointer',
-                isCustom && 'border-secondary/50'
+                isCustom && 'border-secondary/50',
+                isCommunity && 'border-primary/50'
               )}
             >
               <div className="flex items-start justify-between mb-2">
                 <div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-semibold text-foreground">{quest.name}</h3>
                     {isCustom && (
                       <motion.span 
@@ -393,6 +425,16 @@ export default function QuestsPage() {
                       >
                         <Sparkles className="w-2 h-2" />
                         Custom
+                      </motion.span>
+                    )}
+                    {isCommunity && (
+                      <motion.span 
+                        className="text-[10px] px-1.5 py-0.5 rounded bg-primary/20 text-primary flex items-center gap-1"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                      >
+                        <Users className="w-2 h-2" />
+                        Community
                       </motion.span>
                     )}
                   </div>
@@ -478,6 +520,16 @@ export default function QuestsPage() {
         onClose={() => setShowQuestBuilder(false)}
         onCreateQuest={handleCreateQuest}
       />
+
+      {/* Developer Quest Builder Modal */}
+      <AnimatePresence>
+        {showDevQuestBuilder && (
+          <DeveloperQuestBuilder
+            onClose={() => setShowDevQuestBuilder(false)}
+            onQuestCreated={refetchCommunityQuests}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

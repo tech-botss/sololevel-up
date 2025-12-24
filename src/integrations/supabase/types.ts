@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      community_quests: {
+        Row: {
+          category: string
+          created_at: string
+          creator_id: string
+          description: string
+          difficulty: string
+          estimated_minutes: number
+          gold_reward: number
+          id: string
+          is_active: boolean | null
+          name: string
+          stat_end: number | null
+          stat_int: number | null
+          stat_soc: number | null
+          stat_str: number | null
+          stat_wil: number | null
+          updated_at: string
+          xp_reward: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          creator_id: string
+          description: string
+          difficulty: string
+          estimated_minutes: number
+          gold_reward: number
+          id?: string
+          is_active?: boolean | null
+          name: string
+          stat_end?: number | null
+          stat_int?: number | null
+          stat_soc?: number | null
+          stat_str?: number | null
+          stat_wil?: number | null
+          updated_at?: string
+          xp_reward: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          creator_id?: string
+          description?: string
+          difficulty?: string
+          estimated_minutes?: number
+          gold_reward?: number
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          stat_end?: number | null
+          stat_int?: number | null
+          stat_soc?: number | null
+          stat_str?: number | null
+          stat_wil?: number | null
+          updated_at?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       completed_quests: {
         Row: {
           completed_at: string
@@ -293,15 +353,43 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       accept_friend_request: { Args: { request_id: string }; Returns: boolean }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "developer" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -428,6 +516,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["developer", "user"],
+    },
   },
 } as const
