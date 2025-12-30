@@ -477,32 +477,26 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 overflow-y-auto">
-      {/* Animated Background effects */}
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 overflow-y-auto" style={{ backgroundColor: '#0A0A0F' }}>
+      {/* Subtle cyan glow background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div 
-          className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/20 rounded-full blur-[100px]"
+          className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full blur-[120px]"
+          style={{ backgroundColor: 'rgba(0, 217, 255, 0.08)' }}
           animate={{
             scale: [1, 1.2, 1],
-            opacity: [0.2, 0.3, 0.2],
+            opacity: [0.08, 0.15, 0.08],
           }}
           transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div 
-          className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-secondary/20 rounded-full blur-[80px]"
+          className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full blur-[100px]"
+          style={{ backgroundColor: 'rgba(45, 27, 78, 0.15)' }}
           animate={{
             scale: [1.2, 1, 1.2],
-            opacity: [0.2, 0.4, 0.2],
+            opacity: [0.1, 0.2, 0.1],
           }}
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div 
-          className="absolute top-1/3 right-1/4 w-48 h-48 bg-accent/10 rounded-full blur-[60px]"
-          animate={{
-            scale: [1, 1.3, 1],
-            x: [0, 20, 0],
-          }}
-          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
         />
       </div>
 
@@ -512,31 +506,22 @@ export default function AuthPage() {
         transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
         className="relative z-10 w-full max-w-sm"
       >
-        {/* Animated Logo */}
+        {/* Logo */}
         <motion.div 
-          className="text-center mb-6"
+          className="text-center mb-8"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
         >
           <motion.h1 
-            className="font-display text-4xl font-bold gradient-text mb-1"
-            animate={{ 
-              backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-            }}
-            transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
-            style={{ 
-              backgroundSize: '200% 200%',
-              backgroundImage: 'linear-gradient(90deg, hsl(var(--primary)), hsl(var(--secondary)), hsl(var(--primary)))',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
+            className="font-display text-4xl font-bold mb-2 text-glow"
+            style={{ color: '#00D9FF' }}
           >
             SoloRank
           </motion.h1>
           <motion.p 
-            className="text-muted-foreground text-sm"
+            className="text-sm"
+            style={{ color: '#AAAAAA' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
@@ -545,18 +530,22 @@ export default function AuthPage() {
           </motion.p>
         </motion.div>
 
-        {/* Auth Card with glow animation */}
+        {/* Auth Card */}
         <motion.div 
-          className="card-game-glow p-5"
+          className="p-6 rounded-xl border"
+          style={{ 
+            backgroundColor: '#0A0A0F',
+            borderColor: 'rgba(0, 217, 255, 0.2)',
+            boxShadow: '0 0 30px rgba(0, 217, 255, 0.1), 0 4px 20px rgba(0, 0, 0, 0.5)'
+          }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
-          whileHover={{ boxShadow: '0 0 40px hsl(var(--primary) / 0.3)' }}
         >
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as AuthTab)}>
-            <TabsList className="grid w-full grid-cols-2 mb-5">
-              <TabsTrigger value="login" className="data-[state=active]:animate-scale-in">Login</TabsTrigger>
-              <TabsTrigger value="register" className="data-[state=active]:animate-scale-in">Register</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-6" style={{ backgroundColor: '#111111' }}>
+              <TabsTrigger value="login" className="font-display data-[state=active]:text-cyan-neon data-[state=active]:border-b-2 data-[state=active]:border-cyan-neon">LOGIN</TabsTrigger>
+              <TabsTrigger value="register" className="font-display data-[state=active]:text-cyan-neon data-[state=active]:border-b-2 data-[state=active]:border-cyan-neon">REGISTER</TabsTrigger>
             </TabsList>
 
             {/* LOGIN TAB */}
@@ -574,8 +563,8 @@ export default function AuthPage() {
                     <div className="space-y-2">
                       <Button
                         onClick={handleGoogleLogin}
-                        variant="outline"
-                        className="w-full h-11 gap-3"
+                        variant="secondary"
+                        className="w-full h-11 gap-3 border border-border hover:border-primary/30"
                         disabled={loading}
                       >
                         <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -589,8 +578,8 @@ export default function AuthPage() {
                       
                       <Button
                         onClick={handleFacebookLogin}
-                        variant="outline"
-                        className="w-full h-11 gap-3"
+                        variant="secondary"
+                        className="w-full h-11 gap-3 border border-border hover:border-primary/30"
                         disabled={loading}
                       >
                         <svg className="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
@@ -601,8 +590,8 @@ export default function AuthPage() {
                       
                       <Button
                         onClick={handleAppleLogin}
-                        variant="outline"
-                        className="w-full h-11 gap-3"
+                        variant="secondary"
+                        className="w-full h-11 gap-3 border border-border hover:border-primary/30"
                         disabled={loading}
                       >
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -616,19 +605,19 @@ export default function AuthPage() {
                     <Button
                       onClick={handleGuestLogin}
                       variant="ghost"
-                      className="w-full h-11 gap-3 border border-dashed border-border hover:bg-muted"
+                      className="w-full h-11 gap-3 border border-dashed border-gray-dark/50 text-gray-light hover:text-foreground hover:border-primary/30"
                       disabled={loading}
                     >
                       <UserCircle className="w-5 h-5" />
                       Continue as Guest
                     </Button>
 
-                    <div className="relative">
+                    <div className="relative my-4">
                       <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t border-border" />
+                        <span className="w-full border-t" style={{ borderColor: '#1A1A2E' }} />
                       </div>
                       <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                        <span className="px-3 text-gray-dark" style={{ backgroundColor: '#0A0A0F' }}>Or continue with</span>
                       </div>
                     </div>
 
@@ -636,21 +625,27 @@ export default function AuthPage() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => setLoginMethod('email')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                          loginMethod === 'email' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                        }`}
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-display font-bold transition-all"
+                        style={{
+                          backgroundColor: loginMethod === 'email' ? '#00D9FF' : '#111111',
+                          color: loginMethod === 'email' ? '#0A0A0F' : '#666666',
+                          border: loginMethod === 'email' ? 'none' : '1px solid #1A1A2E'
+                        }}
                       >
                         <Mail className="w-4 h-4" />
-                        Email
+                        EMAIL
                       </button>
                       <button
                         onClick={() => setLoginMethod('phone')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                          loginMethod === 'phone' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                        }`}
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-display font-bold transition-all"
+                        style={{
+                          backgroundColor: loginMethod === 'phone' ? '#00D9FF' : '#111111',
+                          color: loginMethod === 'phone' ? '#0A0A0F' : '#666666',
+                          border: loginMethod === 'phone' ? 'none' : '1px solid #1A1A2E'
+                        }}
                       >
                         <Phone className="w-4 h-4" />
-                        Phone
+                        PHONE
                       </button>
                     </div>
 
