@@ -30,9 +30,9 @@ export function BottomNav() {
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="max-w-md mx-auto glass border-t border-border/50 backdrop-blur-xl"
+        className="max-w-md mx-auto bg-dark-ultra/95 border-t border-primary/20 backdrop-blur-xl"
       >
-        <div className="flex items-center justify-around px-2 py-2 safe-area-bottom">
+        <div className="flex items-center justify-around px-1 py-2 safe-area-bottom">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
@@ -43,13 +43,14 @@ export function BottomNav() {
                 to={item.path}
                 className={cn(
                   'nav-item relative flex-1',
-                  isActive ? 'active' : 'text-muted-foreground'
+                  isActive ? 'active' : 'text-gray-dark'
                 )}
               >
+                {/* Cyan bottom indicator for active tab */}
                 {isActive && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-full"
+                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-cyan-neon rounded-full shadow-cyan"
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                   />
                 )}
@@ -62,15 +63,15 @@ export function BottomNav() {
                   <Icon 
                     className={cn(
                       'nav-icon w-5 h-5 transition-all duration-200',
-                      isActive && 'text-primary'
+                      isActive ? 'text-cyan-neon' : 'text-gray-dark'
                     )} 
-                    style={isActive ? { filter: 'drop-shadow(0 0 8px hsl(var(--primary)))' } : {}}
+                    style={isActive ? { filter: 'drop-shadow(0 0 8px #00D9FF)' } : {}}
                   />
                 </motion.div>
                 <motion.span 
                   className={cn(
                     'text-[10px] font-medium mt-0.5',
-                    isActive && 'text-primary'
+                    isActive ? 'text-cyan-neon' : 'text-gray-dark'
                   )}
                   animate={isActive ? { scale: [1, 1.05, 1] } : {}}
                 >
