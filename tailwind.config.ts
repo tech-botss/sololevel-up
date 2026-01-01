@@ -108,6 +108,27 @@ export default {
         cyan: {
           neon: "#00D9FF",
         },
+        // SoloRank Theme Colors
+        emerald: {
+          DEFAULT: "#35D475",
+          glow: "rgba(53, 212, 117, 0.3)",
+          light: "rgba(53, 212, 117, 0.6)",
+          dark: "rgba(53, 212, 117, 0.15)",
+        },
+        pheromone: {
+          DEFAULT: "#8127B9",
+          glow: "rgba(129, 39, 185, 0.3)",
+          light: "rgba(129, 39, 185, 0.7)",
+        },
+        potblack: {
+          DEFAULT: "#161616",
+          light: "#1A1A1A",
+          elevated: "#2A2A2A",
+        },
+        gold: {
+          DEFAULT: "#FFD700",
+          glow: "rgba(255, 215, 0, 0.3)",
+        },
         gray: {
           light: "#AAAAAA",
           dark: "#666666",
@@ -158,6 +179,14 @@ export default {
         "pulse-glow": {
           "0%, 100%": { boxShadow: "0 0 20px hsl(189 100% 50% / 0.2)" },
           "50%": { boxShadow: "0 0 40px hsl(189 100% 50% / 0.4)" },
+        },
+        "pulse-gold": {
+          "0%, 100%": { boxShadow: "0 0 12px rgba(255, 215, 0, 0.3)", borderColor: "#FFD700" },
+          "50%": { boxShadow: "0 0 24px rgba(255, 215, 0, 0.5)", borderColor: "#FFD700" },
+        },
+        "pulse-emerald": {
+          "0%, 100%": { boxShadow: "0 0 12px rgba(53, 212, 117, 0.3)" },
+          "50%": { boxShadow: "0 0 24px rgba(53, 212, 117, 0.5)" },
         },
         "float": {
           "0%, 100%": { transform: "translateY(0)" },
@@ -225,6 +254,8 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         "shimmer": "shimmer 2s infinite linear",
         "pulse-glow": "pulse-glow 2s infinite ease-in-out",
+        "pulse-gold": "pulse-gold 1s infinite ease-in-out",
+        "pulse-emerald": "pulse-emerald 2s infinite ease-in-out",
         "float": "float 3s ease-in-out infinite",
         "fade-in-up": "fade-in-up 0.4s ease-out forwards",
         "scale-in": "scale-in 0.2s ease-out forwards",
