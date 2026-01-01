@@ -17,6 +17,7 @@ import FriendsPage from "./pages/FriendsPage";
 import FriendProfilePage from "./pages/FriendProfilePage";
 import StorePage from "./pages/StorePage";
 import AchievementsPage from "./pages/AchievementsPage";
+import { StreaksPage } from "./components/timer/StreaksPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="/friends/:friendId" element={<ProtectedRoute><FriendProfilePage /></ProtectedRoute>} />
               <Route path="/store" element={<ProtectedRoute><StorePage /></ProtectedRoute>} />
               <Route path="/achievements" element={<ProtectedRoute><AchievementsPage /></ProtectedRoute>} />
+              <Route path="/streaks" element={<ProtectedRoute><StreaksPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Routes>
