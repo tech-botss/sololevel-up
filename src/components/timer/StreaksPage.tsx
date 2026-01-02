@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Flame, Settings, Calendar } from 'lucide-react';
 import { QuestTimerBubble } from './QuestTimerBubble';
@@ -6,23 +6,39 @@ import { ActivityCalendar } from './ActivityCalendar';
 import { TimerSettings } from './TimerSettings';
 import { useTimerSettings } from '@/hooks/useTimerSettings';
 import { useActivityCalendar } from '@/hooks/useActivityCalendar';
+import { useGameStore } from '@/stores/gameStore';
 import { TimerState } from '@/types/timer';
 
 type TabType = 'streaks' | 'settings';
-
-// Mock active quest for demo
-const MOCK_TIMER: TimerState = {
-  questId: 'quest-1',
-  questName: 'Complete 30 min workout',
-  timeRemaining: 1847, // ~30 minutes
-  deadline: new Date(Date.now() + 1847000).toISOString(),
-  isActive: true,
-};
 
 export function StreaksPage() {
   const [activeTab, setActiveTab] = useState<TabType>('streaks');
   const { settings, saveSettings, updateSetting, resetToDefaults, isLoaded: settingsLoaded } = useTimerSettings();
   const { calendar, restoreStreak, canRestoreStreak, isLoaded: calendarLoaded } = useActivityCalendar();
+  const activeQuest = useGameStore((state) => state.activeQuest);
+
+  // Convert active quest to timer state
+  const timerState: TimerState = useMemo(() => {
+    if (!activeQuest) {
+      return {
+        questId: null,
+        questName: '',
+        timeRemaining: 0,
+        deadline: null,
+        isActive: false,
+      };
+    }
+
+    const deadline = new Date(activeQuest.startedAt.getTime() + activeQuest.estimatedMinutes * 60 * 1000);
+    
+    return {
+      questId: activeQuest.id,
+      questName: activeQuest.name,
+      timeRemaining: activeQuest.remainingSeconds,
+      deadline: deadline.toISOString(),
+      isActive: !activeQuest.isPaused,
+    };
+  }, [activeQuest]);
 
   const handleSaveSettings = () => {
     return saveSettings(settings);
@@ -38,8 +54,8 @@ export function StreaksPage() {
 
   return (
     <div className="min-h-screen bg-potblack">
-      {/* Floating Timer */}
-      <QuestTimerBubble settings={settings} timer={MOCK_TIMER} />
+      {/* Floating Timer - only show when there's an active quest */}
+      {activeQuest && <QuestTimerBubble settings={settings} timer={timerState} />}
 
       {/* Main Content */}
       <div className="max-w-[1200px] mx-auto px-5 py-6 pb-24">
