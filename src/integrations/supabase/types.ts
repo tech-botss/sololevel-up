@@ -118,6 +118,47 @@ export type Database = {
           },
         ]
       }
+      daily_activities: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          is_restored: boolean
+          quests_completed: number
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          is_restored?: boolean
+          quests_completed?: number
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          is_restored?: boolean
+          quests_completed?: number
+          updated_at?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_activities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       friend_requests: {
         Row: {
           created_at: string
