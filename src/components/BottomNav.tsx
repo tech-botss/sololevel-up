@@ -7,13 +7,15 @@ import {
   Trophy, 
   Users, 
   ShoppingBag, 
-  Award 
+  Award,
+  Flame 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { path: '/', icon: Home, label: 'Home' },
   { path: '/quests', icon: Swords, label: 'Quests' },
+  { path: '/streaks', icon: Flame, label: 'Streaks' },
   { path: '/profile', icon: User, label: 'Profile' },
   { path: '/leaderboards', icon: Trophy, label: 'Ranks' },
   { path: '/friends', icon: Users, label: 'Friends' },
