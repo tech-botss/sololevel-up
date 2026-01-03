@@ -31,100 +31,98 @@
 
 @layer base {
   :root {
-    /* === CORE DARK PALETTE === */
-    /* Ultra Dark Background: #0A0A0F */
-    --background: 240 25% 3%;
+    /* === SOLORANK ANIME-INSPIRED PALETTE === */
+    /* Pot Black Background: #161616 */
+    --background: 0 0% 9%;
     --foreground: 0 0% 100%;
 
-    /* Dark Gray: #111111 (secondary backgrounds) */
-    --input: 0 0% 7%;
-    --muted: 0 0% 7%;
+    /* Surface: #1A1A1A */
+    --input: 0 0% 10%;
+    --muted: 0 0% 10%;
     --muted-foreground: 0 0% 67%;
 
-    /* Dark Charcoal: #1A1A2E (cards, containers) */
-    --card: 240 27% 14%;
+    /* Cards: #1A1A1A with elevated #2A2A2A borders */
+    --card: 0 0% 10%;
     --card-foreground: 0 0% 100%;
-    --card-elevated: 240 27% 16%;
+    --card-elevated: 0 0% 17%;
 
-    --popover: 240 25% 5%;
+    --popover: 0 0% 9%;
     --popover-foreground: 0 0% 100%;
 
-    /* Neon Cyan: #00D9FF (ONLY accent for active states) */
-    --primary: 189 100% 50%;
-    --primary-foreground: 240 25% 3%;
-    --primary-glow: 189 100% 60%;
+    /* Primary: Emerald #35D475 */
+    --primary: 146 65% 51%;
+    --primary-foreground: 0 0% 9%;
+    --primary-glow: 146 65% 60%;
 
-    /* Deep Purple: #2D1B4E (subtle accent only) */
-    --secondary: 261 48% 21%;
+    /* Secondary: Purple #8127B9 */
+    --secondary: 276 64% 44%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-glow: 261 48% 35%;
+    --secondary-glow: 276 64% 55%;
 
-    /* Accent - Same as Primary (cyan) */
-    --accent: 189 100% 50%;
-    --accent-foreground: 240 25% 3%;
-    --accent-glow: 189 100% 60%;
+    /* Accent: Gold #FFD700 */
+    --accent: 51 100% 50%;
+    --accent-foreground: 0 0% 9%;
+    --accent-glow: 51 100% 60%;
 
-    /* Destructive - Dark Red */
-    --destructive: 0 60% 35%;
+    /* Destructive: Red #FF6347 */
+    --destructive: 9 100% 64%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders */
-    --border: 240 15% 18%;
-    --ring: 189 100% 50%;
+    /* Borders: #2A2A2A */
+    --border: 0 0% 17%;
+    --ring: 146 65% 51%;
 
     /* Radius */
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    /* === STAT COLORS (Muted/Dark versions) === */
-    --stat-str: 0 50% 40%;
-    --stat-int: 210 60% 40%;
-    --stat-end: 145 50% 35%;
-    --stat-wil: 261 48% 35%;
-    --stat-soc: 189 100% 40%;
+    /* === STAT COLORS === */
+    --stat-str: 9 100% 64%;
+    --stat-int: 210 60% 50%;
+    --stat-end: 146 65% 51%;
+    --stat-wil: 276 64% 44%;
+    --stat-soc: 51 100% 50%;
 
-    /* === RARITY COLORS (Dark versions) === */
-    /* Common: Light Gray #AAAAAA */
-    --rarity-common: 0 0% 67%;
-    /* Uncommon: Deep Purple #2D1B4E */
-    --rarity-uncommon: 261 48% 21%;
-    /* Rare: Dark Cyan #006666 */
-    --rarity-rare: 180 100% 20%;
-    /* Legendary: Dark Gold #664D00 */
-    --rarity-legendary: 45 100% 20%;
+    /* === RARITY COLORS === */
+    --rarity-common: 0 0% 100%;
+    --rarity-uncommon: 146 65% 51%;
+    --rarity-rare: 276 64% 44%;
+    --rarity-epic: 51 100% 50%;
+    --rarity-mythic: 330 100% 71%;
 
-    /* === DIFFICULTY COLORS (Dark versions) === */
-    --difficulty-easy: 145 50% 30%;
-    --difficulty-medium: 45 70% 30%;
-    --difficulty-hard: 0 50% 35%;
+    /* === DIFFICULTY COLORS === */
+    --difficulty-easy: 146 65% 45%;
+    --difficulty-medium: 51 100% 50%;
+    --difficulty-hard: 9 100% 60%;
 
     /* === STATUS COLORS === */
-    --online: 145 50% 35%;
+    --online: 146 65% 51%;
     --offline: 0 0% 40%;
-    --warning: 38 70% 35%;
+    --warning: 38 92% 50%;
 
-    /* === GRADIENTS (Subtle, dark) === */
-    --gradient-primary: linear-gradient(135deg, hsl(189 100% 50%) 0%, hsl(189 100% 40%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(261 48% 21%) 0%, hsl(261 48% 15%) 100%);
-    --gradient-dark: linear-gradient(180deg, hsl(240 25% 5%) 0%, hsl(240 25% 3%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(240 27% 14%) 0%, hsl(240 25% 8%) 100%);
-    --gradient-xp: linear-gradient(90deg, hsl(189 100% 50%) 0%, hsl(189 100% 40%) 100%);
-    --gradient-cyan-glow: linear-gradient(135deg, hsl(189 100% 50% / 0.2) 0%, transparent 100%);
+    /* === GRADIENTS === */
+    --gradient-primary: linear-gradient(135deg, hsl(146 65% 51%) 0%, hsl(146 65% 40%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(276 64% 44%) 0%, hsl(276 64% 35%) 100%);
+    --gradient-dark: linear-gradient(180deg, hsl(0 0% 10%) 0%, hsl(0 0% 9%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 10%) 0%, hsl(0 0% 9%) 100%);
+    --gradient-xp: linear-gradient(90deg, hsl(146 65% 51%) 0%, hsl(146 65% 40%) 100%);
+    --gradient-emerald-glow: linear-gradient(135deg, hsl(146 65% 51% / 0.2) 0%, transparent 100%);
 
     /* === SHADOWS === */
-    --shadow-glow-primary: 0 0 20px hsl(189 100% 50% / 0.2), 0 0 40px hsl(189 100% 50% / 0.1);
-    --shadow-glow-secondary: 0 0 20px hsl(261 48% 35% / 0.3);
+    --shadow-glow-primary: 0 0 20px hsl(146 65% 51% / 0.3), 0 0 40px hsl(146 65% 51% / 0.15);
+    --shadow-glow-secondary: 0 0 20px hsl(276 64% 44% / 0.3);
+    --shadow-glow-accent: 0 0 20px hsl(51 100% 50% / 0.3);
     --shadow-card: 0 4px 12px hsl(0 0% 0% / 0.5);
     --shadow-neon: 0 0 10px currentColor, 0 0 20px currentColor;
 
     /* === SIDEBAR === */
-    --sidebar-background: 240 25% 4%;
+    --sidebar-background: 0 0% 9%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 189 100% 50%;
-    --sidebar-primary-foreground: 240 25% 3%;
-    --sidebar-accent: 240 27% 12%;
+    --sidebar-primary: 146 65% 51%;
+    --sidebar-primary-foreground: 0 0% 9%;
+    --sidebar-accent: 0 0% 12%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 240 15% 18%;
-    --sidebar-ring: 189 100% 50%;
+    --sidebar-border: 0 0% 17%;
+    --sidebar-ring: 146 65% 51%;
   }
 }
 
@@ -141,13 +139,13 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    background-color: #0A0A0F;
+    background-color: #161616;
     min-height: 100vh;
     position: relative;
     overflow-x: hidden;
   }
 
-  /* Subtle scanline effect */
+  /* Subtle scanline effect - emerald tint */
   body::before {
     content: '';
     position: fixed;
@@ -157,29 +155,29 @@
         0deg,
         transparent,
         transparent 2px,
-        hsl(189 100% 50% / 0.008) 2px,
-        hsl(189 100% 50% / 0.008) 4px
+        hsl(146 65% 51% / 0.005) 2px,
+        hsl(146 65% 51% / 0.005) 4px
       );
     pointer-events: none;
     z-index: 9999;
   }
 
-  /* Custom scrollbar - ultra dark */
+  /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 4px;
   }
 
   ::-webkit-scrollbar-track {
-    background: #0A0A0F;
+    background: #161616;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #1A1A2E;
+    background: #2A2A2A;
     border-radius: 2px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(189 100% 50%);
+    background: hsl(146 65% 51%);
   }
 }
 
