@@ -98,39 +98,33 @@ export default {
           offline: "hsl(var(--offline))",
           warning: "hsl(var(--warning))",
         },
-        // Direct color values for the dark theme
-        dark: {
-          ultra: "#0A0A0F",
-          gray: "#111111",
-          charcoal: "#1A1A2E",
-          purple: "#2D1B4E",
-        },
-        cyan: {
-          neon: "#00D9FF",
-        },
-        // SoloRank Theme Colors
+        // SoloRank Theme Colors (Anime-Inspired)
         emerald: {
           DEFAULT: "#35D475",
           glow: "rgba(53, 212, 117, 0.3)",
           light: "rgba(53, 212, 117, 0.6)",
           dark: "rgba(53, 212, 117, 0.15)",
         },
-        pheromone: {
+        purple: {
           DEFAULT: "#8127B9",
           glow: "rgba(129, 39, 185, 0.3)",
           light: "rgba(129, 39, 185, 0.7)",
         },
         potblack: {
           DEFAULT: "#161616",
-          light: "#1A1A1A",
+          surface: "#1A1A1A",
           elevated: "#2A2A2A",
         },
         gold: {
           DEFAULT: "#FFD700",
           glow: "rgba(255, 215, 0, 0.3)",
         },
+        tomato: {
+          DEFAULT: "#FF6347",
+        },
         gray: {
           light: "#AAAAAA",
+          medium: "#888888",
           dark: "#666666",
         },
       },
