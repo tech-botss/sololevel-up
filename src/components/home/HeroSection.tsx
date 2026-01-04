@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { Star, Flame, Coins, Trophy } from 'lucide-react';
+import { Flame, Coins, Trophy, Zap } from 'lucide-react';
 
 interface HeroSectionProps {
   username: string;
@@ -21,140 +20,135 @@ export function HeroSection({
   currentStreak,
   gold,
   achievementsCount,
-  avatarUrl,
 }: HeroSectionProps) {
-  const navigate = useNavigate();
-  const xpProgress = (currentXp / xpToNext) * 100;
-  const tierNumber = Math.floor(level / 10) + 1;
-  const tierName = getTierName(tierNumber);
+  const xpProgress = Math.min((currentXp / xpToNext) * 100, 100);
 
   return (
-    <motion.section
+    <motion.div 
+      className="status-window mb-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="flex flex-col md:flex-row gap-4 mb-6"
+      transition={{ duration: 0.5 }}
     >
-      {/* Character Portrait */}
-      <motion.div
-        className="relative mx-auto md:mx-0 cursor-pointer"
-        onClick={() => navigate('/profile')}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+      {/* Header */}
+      <motion.div 
+        className="text-center mb-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1 }}
       >
+        <motion.h2 
+          className="font-display text-xl font-bold text-primary tracking-[0.2em] uppercase mb-2"
+          animate={{ 
+            textShadow: [
+              '0 0 10px hsl(189 100% 50% / 0.5)',
+              '0 0 25px hsl(189 100% 50% / 0.8)',
+              '0 0 10px hsl(189 100% 50% / 0.5)',
+            ]
+          }}
+          transition={{ duration: 2.5, repeat: Infinity }}
+        >
+          STATUS
+        </motion.h2>
+        <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+          <span className="font-display tracking-wider">RANK: <span className="text-accent">HUNTER</span></span>
+          <span className="font-display tracking-wider">TITLE: <span className="text-primary">{username}</span></span>
+        </div>
+      </motion.div>
+
+      {/* Level Display */}
+      <motion.div 
+        className="text-center mb-6"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.2 }}
+      >
+        <p className="text-sm text-muted-foreground mb-2 font-display tracking-wider uppercase">Level</p>
         <motion.div
-          className="w-[140px] h-[160px] md:w-[180px] md:h-[200px] rounded-xl border-[3px] border-emerald overflow-hidden"
+          className="inline-flex items-center justify-center px-8 py-3 border-2 border-primary/50 rounded bg-primary/10"
           animate={{
             boxShadow: [
-              '0 0 20px rgba(53, 212, 117, 0.3)',
-              '0 0 30px rgba(53, 212, 117, 0.5)',
-              '0 0 20px rgba(53, 212, 117, 0.3)',
-            ],
+              '0 0 15px hsl(189 100% 50% / 0.2)',
+              '0 0 30px hsl(189 100% 50% / 0.4)',
+              '0 0 15px hsl(189 100% 50% / 0.2)',
+            ]
           }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          transition={{ duration: 2, repeat: Infinity }}
         >
-          {avatarUrl ? (
-            <img
-              src={avatarUrl}
-              alt={username}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-potblack-surface flex items-center justify-center">
-              <span className="text-4xl font-display text-emerald">
-                {username.charAt(0).toUpperCase()}
-              </span>
-            </div>
-          )}
+          <span className="font-display text-4xl font-bold text-primary text-glow">{level}</span>
         </motion.div>
       </motion.div>
 
-      {/* Player Stats */}
-      <div className="flex-1 space-y-3">
-        {/* Name + Level Badge */}
-        <div className="flex items-center gap-3 justify-center md:justify-start">
-          <h2 className="font-display text-xl text-foreground">{username}</h2>
-          <motion.div
-            className="flex items-center justify-center w-12 h-8 rounded-full bg-gold/20 border border-gold"
-            animate={{ boxShadow: ['0 0 8px rgba(255, 215, 0, 0.3)', '0 0 16px rgba(255, 215, 0, 0.5)', '0 0 8px rgba(255, 215, 0, 0.3)'] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            <span className="font-display text-sm text-gold">Lv.{level}</span>
-          </motion.div>
+      {/* XP Progress */}
+      <motion.div 
+        className="mb-6"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Zap className="w-4 h-4 text-primary" />
+            <span className="text-sm font-display tracking-wider text-muted-foreground">XP</span>
+          </div>
+          <span className="text-sm font-display text-primary">
+            {currentXp.toLocaleString()} / {xpToNext.toLocaleString()}
+          </span>
         </div>
+        <div className="progress-xp">
+          <motion.div
+            className="progress-xp-fill"
+            initial={{ width: 0 }}
+            animate={{ width: `${xpProgress}%` }}
+            transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
+          />
+        </div>
+      </motion.div>
 
-        {/* Current Tier */}
-        <div className="text-center md:text-left">
-          <p className="text-sm text-gray-light">
-            Tier {tierNumber} - {tierName}
-          </p>
-          <div className="mt-1 h-2 bg-potblack-elevated rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-purple rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${(level % 10) * 10}%` }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
-            />
+      {/* Stats Grid */}
+      <motion.div 
+        className="grid grid-cols-2 gap-3"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+      >
+        {/* Streak */}
+        <div className="flex items-center gap-3 p-3 rounded border border-border bg-muted/30">
+          <motion.div
+            animate={{ rotate: [0, 5, -5, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <Flame className="w-5 h-5 text-destructive" />
+          </motion.div>
+          <div>
+            <p className="text-xs text-muted-foreground font-display tracking-wider uppercase">Streak</p>
+            <p className="text-lg font-display font-bold text-foreground">{currentStreak}</p>
           </div>
         </div>
 
-        {/* XP Progress */}
-        <div className="text-center md:text-left">
-          <p className="text-xs text-gray-light mb-1">Session XP</p>
-          <div className="h-2 bg-potblack-elevated rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-emerald rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${xpProgress}%` }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
-            />
+        {/* Gold */}
+        <div className="flex items-center gap-3 p-3 rounded border border-border bg-muted/30">
+          <motion.div
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <Coins className="w-5 h-5 text-accent" />
+          </motion.div>
+          <div>
+            <p className="text-xs text-muted-foreground font-display tracking-wider uppercase">Gold</p>
+            <p className="text-lg font-display font-bold text-accent">{gold.toLocaleString()}</p>
           </div>
-          <p className="text-xs text-gray-light mt-1">
-            {currentXp.toLocaleString()} / {xpToNext.toLocaleString()} XP
-          </p>
         </div>
 
-        {/* Quick Stats Row */}
-        <div className="grid grid-cols-3 gap-2 pt-2">
-          <motion.div
-            className="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-potblack-surface border border-potblack-elevated"
-            whileHover={{ borderColor: 'rgba(255, 99, 71, 0.5)' }}
-          >
-            <Flame className="w-4 h-4 text-tomato" />
-            <span className="text-xs font-medium text-gold">{currentStreak}-Day</span>
-          </motion.div>
-          <motion.div
-            className="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-potblack-surface border border-potblack-elevated"
-            whileHover={{ borderColor: 'rgba(53, 212, 117, 0.5)' }}
-          >
-            <Coins className="w-4 h-4 text-gold" />
-            <span className="text-xs font-medium text-emerald">{gold.toLocaleString()}</span>
-          </motion.div>
-          <motion.div
-            className="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-potblack-surface border border-potblack-elevated"
-            whileHover={{ borderColor: 'rgba(129, 39, 185, 0.5)' }}
-          >
-            <Trophy className="w-4 h-4 text-purple" />
-            <span className="text-xs font-medium text-purple">{achievementsCount}</span>
-          </motion.div>
+        {/* Achievements */}
+        <div className="col-span-2 flex items-center gap-3 p-3 rounded border border-border bg-muted/30">
+          <Trophy className="w-5 h-5 text-secondary" />
+          <div>
+            <p className="text-xs text-muted-foreground font-display tracking-wider uppercase">Quests Completed</p>
+            <p className="text-lg font-display font-bold text-secondary">{achievementsCount}</p>
+          </div>
         </div>
-      </div>
-    </motion.section>
+      </motion.div>
+    </motion.div>
   );
-}
-
-function getTierName(tier: number): string {
-  const tierNames: Record<number, string> = {
-    1: "Initiate's Path",
-    2: "Rising Hunter",
-    3: "Proven Warrior",
-    4: "Elite Striker",
-    5: "Warrior's Ascension",
-    6: "Shadow Blade",
-    7: "Legendary Hunter",
-    8: "Mythic Champion",
-    9: "Transcendent",
-    10: "Monarch",
-  };
-  return tierNames[Math.min(tier, 10)] || "Unknown";
 }

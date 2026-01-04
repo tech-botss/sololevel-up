@@ -70,9 +70,9 @@ export default function HomePage() {
   // Loading state
   if (!profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-potblack">
+      <div className="min-h-screen flex items-center justify-center">
         <motion.div
-          className="text-emerald"
+          className="text-primary"
           animate={{ opacity: [0.5, 1, 0.5], rotate: [0, 180, 360] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
@@ -86,16 +86,20 @@ export default function HomePage() {
   const featuredQuest = predefinedQuests.find((q) => q.difficulty === 'medium') || predefinedQuests[0];
 
   return (
-    <div className="min-h-screen pb-24 px-4 pt-6 bg-potblack relative overflow-hidden">
-      {/* Ambient emerald glow */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full blur-[150px]"
-          style={{ backgroundColor: 'rgba(53, 212, 117, 0.05)' }}
+    <div className="min-h-screen pb-24 px-4 pt-6 relative overflow-hidden">
+      {/* Ambient background effects */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <motion.div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full"
+          style={{ background: 'radial-gradient(ellipse, hsl(189 100% 50% / 0.08) 0%, transparent 70%)' }}
+          animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5] }}
+          transition={{ duration: 8, repeat: Infinity }}
         />
-        <div
-          className="absolute bottom-0 right-0 w-[400px] h-[300px] rounded-full blur-[120px]"
-          style={{ backgroundColor: 'rgba(129, 39, 185, 0.03)' }}
+        <motion.div
+          className="absolute bottom-1/4 right-0 w-[400px] h-[400px] rounded-full"
+          style={{ background: 'radial-gradient(circle, hsl(265 70% 50% / 0.05) 0%, transparent 70%)' }}
+          animate={{ scale: [1.1, 1, 1.1], opacity: [0.3, 0.5, 0.3] }}
+          transition={{ duration: 6, repeat: Infinity }}
         />
       </div>
 
@@ -106,24 +110,24 @@ export default function HomePage() {
         className="flex items-center justify-between mb-6 relative z-10"
       >
         <motion.h1
-          className="font-display text-2xl font-bold text-emerald"
+          className="font-display text-2xl font-bold text-primary tracking-[0.1em]"
           animate={{
             textShadow: [
-              '0 0 10px rgba(53, 212, 117, 0.3)',
-              '0 0 20px rgba(53, 212, 117, 0.5)',
-              '0 0 10px rgba(53, 212, 117, 0.3)',
+              '0 0 10px hsl(189 100% 50% / 0.5)',
+              '0 0 30px hsl(189 100% 50% / 0.8)',
+              '0 0 10px hsl(189 100% 50% / 0.5)',
             ],
           }}
-          transition={{ duration: 2, repeat: Infinity }}
+          transition={{ duration: 3, repeat: Infinity }}
         >
-          SoloRank
+          SOLORANK
         </motion.h1>
         <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
           <Button
             variant="ghost"
             size="icon"
             onClick={handleSignOut}
-            className="text-gray-dark hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground hover:bg-muted/50"
           >
             <LogOut className="w-5 h-5" />
           </Button>

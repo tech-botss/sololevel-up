@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ClipboardList, Sparkles, Flame } from 'lucide-react';
+import { CheckCircle, Zap, Flame } from 'lucide-react';
 
 interface TodaySummaryProps {
   questsCompleted: number;
@@ -8,95 +8,70 @@ interface TodaySummaryProps {
   streak: number;
 }
 
-export function TodaySummary({
-  questsCompleted,
-  totalDailyQuests,
-  xpEarned,
-  streak,
-}: TodaySummaryProps) {
-  const questProgress = (questsCompleted / totalDailyQuests) * 100;
-
+export function TodaySummary({ questsCompleted, xpEarned, streak }: TodaySummaryProps) {
   return (
-    <motion.section
+    <motion.div
+      className="mb-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2, duration: 0.4 }}
-      className="mb-6"
+      transition={{ delay: 0.4 }}
     >
-      <h3 className="font-display text-lg text-foreground mb-3">Today's Summary</h3>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        {/* Daily Quests Card */}
-        <motion.div
-          className="p-4 rounded-xl bg-potblack-surface border border-potblack-elevated"
-          whileHover={{ borderColor: 'rgba(53, 212, 117, 0.5)' }}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <ClipboardList className="w-5 h-5 text-emerald" />
-            <span className="text-xs text-gray-light">Daily Quests</span>
-          </div>
-          <p className="font-display text-xl text-emerald">
-            {questsCompleted} <span className="text-sm text-gray-light">of {totalDailyQuests}</span>
-          </p>
-          <div className="mt-2 h-1.5 bg-potblack-elevated rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-emerald rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${questProgress}%` }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            />
-          </div>
-        </motion.div>
+      {/* Section Header */}
+      <div className="flex items-center gap-2 mb-3">
+        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+        <span className="text-xs font-display text-muted-foreground tracking-[0.2em] uppercase">Today</span>
+        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+      </div>
 
-        {/* XP Earned Card */}
-        <motion.div
-          className="p-4 rounded-xl bg-potblack-surface border border-potblack-elevated relative overflow-hidden"
-          whileHover={{ borderColor: 'rgba(255, 215, 0, 0.5)' }}
+      <div className="grid grid-cols-3 gap-2">
+        {/* Quests Completed */}
+        <motion.div 
+          className="card-game p-3 text-center"
+          whileHover={{ scale: 1.02 }}
         >
           <motion.div
-            className="absolute top-2 right-2"
-            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+            className="mb-2 flex justify-center"
+            animate={{ scale: [1, 1.1, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            <Sparkles className="w-4 h-4 text-gold/50" />
+            <CheckCircle className="w-5 h-5 text-accent" />
           </motion.div>
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-5 h-5 text-gold" />
-            <span className="text-xs text-gray-light">XP Earned</span>
-          </div>
-          <motion.p
-            className="font-display text-xl text-gold"
-            animate={{ textShadow: ['0 0 10px rgba(255, 215, 0, 0.3)', '0 0 20px rgba(255, 215, 0, 0.5)', '0 0 10px rgba(255, 215, 0, 0.3)'] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            {xpEarned.toLocaleString()}
-          </motion.p>
-          <p className="text-xs text-gray-light mt-1">This Session</p>
+          <p className="font-display text-lg font-bold text-foreground">{questsCompleted}</p>
+          <p className="text-[10px] text-muted-foreground font-display tracking-wider uppercase">Quests</p>
         </motion.div>
 
-        {/* Login Streak Card */}
-        <motion.div
-          className="p-4 rounded-xl bg-potblack-surface border border-potblack-elevated col-span-2 md:col-span-1"
-          whileHover={{ borderColor: 'rgba(255, 99, 71, 0.5)' }}
+        {/* XP Earned */}
+        <motion.div 
+          className="card-game p-3 text-center"
+          whileHover={{ scale: 1.02 }}
         >
-          <div className="flex items-center gap-2 mb-2">
-            <motion.div
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
-            >
-              <Flame className="w-5 h-5 text-tomato" />
-            </motion.div>
-            <span className="text-xs text-gray-light">Login Streak</span>
-          </div>
-          <motion.p
-            className="font-display text-xl text-tomato"
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 1, repeat: Infinity, repeatDelay: 1 }}
+          <motion.div
+            className="mb-2 flex justify-center"
+            animate={{ rotate: [0, 10, -10, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
           >
-            {streak}
-          </motion.p>
-          <p className="text-xs text-gray-light mt-1">Days in a Row</p>
+            <Zap className="w-5 h-5 text-primary" />
+          </motion.div>
+          <p className="font-display text-lg font-bold text-primary">{xpEarned}</p>
+          <p className="text-[10px] text-muted-foreground font-display tracking-wider uppercase">XP</p>
+        </motion.div>
+
+        {/* Streak */}
+        <motion.div 
+          className="card-game p-3 text-center"
+          whileHover={{ scale: 1.02 }}
+        >
+          <motion.div
+            className="mb-2 flex justify-center"
+            animate={{ y: [0, -3, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            <Flame className="w-5 h-5 text-destructive" />
+          </motion.div>
+          <p className="font-display text-lg font-bold text-destructive">{streak}</p>
+          <p className="text-[10px] text-muted-foreground font-display tracking-wider uppercase">Streak</p>
         </motion.div>
       </div>
-    </motion.section>
+    </motion.div>
   );
 }
