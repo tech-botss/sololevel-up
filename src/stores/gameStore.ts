@@ -172,6 +172,7 @@ interface GameState {
   loading: boolean;
   ownedCosmetics: string[];
   equippedCosmetics: EquippedCosmetics;
+  pendingAchievement: string | null;
   
   fetchProfile: (userId: string) => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
@@ -185,6 +186,8 @@ interface GameState {
   fetchOwnedCosmetics: (userId: string) => Promise<void>;
   equipCosmetic: (cosmeticId: string, category: string) => Promise<boolean>;
   unequipCosmetic: (category: string) => Promise<boolean>;
+  clearPendingAchievement: () => void;
+  canCompleteQuest: () => boolean;
 }
 
 export const useGameStore = create<GameState>()((set, get) => ({
@@ -194,6 +197,24 @@ export const useGameStore = create<GameState>()((set, get) => ({
   loading: false,
   ownedCosmetics: [],
   equippedCosmetics: {},
+  pendingAchievement: null,
+  
+  clearPendingAchievement: () => set({ pendingAchievement: null }),
+  
+  canCompleteQuest: () => {
+    const { activeQuest } = get();
+    if (!activeQuest) return false;
+    
+    // Check if timer has expired
+    if (activeQuest.remainingSeconds <= 0) return true;
+    
+    // Also check minimum elapsed time (at least 60% of estimated time must pass)
+    const totalSeconds = activeQuest.estimatedMinutes * 60;
+    const elapsedSeconds = totalSeconds - activeQuest.remainingSeconds;
+    const minRequiredSeconds = Math.max(60, totalSeconds * 0.6); // At least 1 min or 60% of time
+    
+    return elapsedSeconds >= minRequiredSeconds;
+  },
   
   fetchProfile: async (userId: string) => {
     set({ loading: true });
@@ -373,6 +394,11 @@ export const useGameStore = create<GameState>()((set, get) => ({
         rank_state: profile.rank_state,
         rank_global: profile.rank_global,
       });
+      
+      // Show achievement popup for the first unlocked achievement
+      if (achievementsUnlocked && achievementsUnlocked.length > 0) {
+        set({ pendingAchievement: achievementsUnlocked[0] });
+      }
       
       return { 
         xpEarned, 
