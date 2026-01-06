@@ -13,6 +13,7 @@ import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { useDeveloperRole } from '@/hooks/useDeveloperRole';
 import { useCommunityQuests } from '@/hooks/useCommunityQuests';
+import { AchievementPopup } from '@/components/AchievementPopup';
 
 const categories: { id: QuestCategory | 'all'; label: string }[] = [
   { id: 'all', label: 'All' },
@@ -38,7 +39,7 @@ const listItemVariants = {
 };
 
 export default function QuestsPage() {
-  const { activeQuest, startQuest, pauseQuest, resumeQuest, abandonQuest, completeQuest, updateQuestTimer } = useGameStore();
+  const { activeQuest, startQuest, pauseQuest, resumeQuest, abandonQuest, completeQuest, updateQuestTimer, canCompleteQuest, pendingAchievement, clearPendingAchievement } = useGameStore();
   const [selectedCategory, setSelectedCategory] = useState<QuestCategory | 'all'>('all');
   const [showQuestBuilder, setShowQuestBuilder] = useState(false);
   const [showDevQuestBuilder, setShowDevQuestBuilder] = useState(false);
@@ -317,20 +318,20 @@ export default function QuestsPage() {
                 <Button
                   className="w-full"
                   onClick={handleCompleteQuest}
-                  disabled={activeQuest.remainingSeconds > 0}
+                  disabled={!canCompleteQuest()}
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Complete
                 </Button>
               </motion.div>
             </div>
-            {activeQuest.remainingSeconds > 0 && (
+            {!canCompleteQuest() && (
               <motion.p 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="text-center text-[10px] text-muted-foreground mt-2"
               >
-                Complete button unlocks when timer reaches 0
+                Complete at least 60% of the quest time to finish
               </motion.p>
             )}
           </motion.div>
@@ -530,6 +531,12 @@ export default function QuestsPage() {
           />
         )}
       </AnimatePresence>
+
+      {/* Achievement Popup */}
+      <AchievementPopup 
+        achievementId={pendingAchievement} 
+        onClose={clearPendingAchievement} 
+      />
     </div>
   );
 }
