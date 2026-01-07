@@ -159,6 +159,47 @@ export type Database = {
           },
         ]
       }
+      daily_login_rewards: {
+        Row: {
+          claimed_at: string
+          cosmetic_id: string | null
+          created_at: string
+          day_number: number
+          id: string
+          reward_amount: number
+          reward_type: string
+          user_id: string
+        }
+        Insert: {
+          claimed_at?: string
+          cosmetic_id?: string | null
+          created_at?: string
+          day_number?: number
+          id?: string
+          reward_amount?: number
+          reward_type: string
+          user_id: string
+        }
+        Update: {
+          claimed_at?: string
+          cosmetic_id?: string | null
+          created_at?: string
+          day_number?: number
+          id?: string
+          reward_amount?: number
+          reward_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_login_rewards_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       friend_requests: {
         Row: {
           created_at: string
@@ -243,8 +284,11 @@ export type Database = {
           gender: string | null
           gold: number
           id: string
+          last_login_date: string | null
           last_quest_date: string | null
+          last_spin_date: string | null
           level: number
+          login_streak: number | null
           longest_streak: number
           missed_days: number
           rank_city: number
@@ -276,8 +320,11 @@ export type Database = {
           gender?: string | null
           gold?: number
           id: string
+          last_login_date?: string | null
           last_quest_date?: string | null
+          last_spin_date?: string | null
           level?: number
+          login_streak?: number | null
           longest_streak?: number
           missed_days?: number
           rank_city?: number
@@ -309,8 +356,11 @@ export type Database = {
           gender?: string | null
           gold?: number
           id?: string
+          last_login_date?: string | null
           last_quest_date?: string | null
+          last_spin_date?: string | null
           level?: number
+          login_streak?: number | null
           longest_streak?: number
           missed_days?: number
           rank_city?: number

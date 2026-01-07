@@ -205,15 +205,23 @@ export const useGameStore = create<GameState>()((set, get) => ({
     const { activeQuest } = get();
     if (!activeQuest) return false;
     
-    // Check if timer has expired
+    // Calculate actual elapsed time since quest started (not just remaining seconds)
+    const startTime = new Date(activeQuest.startedAt).getTime();
+    const now = Date.now();
+    const actualElapsedMs = now - startTime;
+    const actualElapsedSeconds = Math.floor(actualElapsedMs / 1000);
+    
+    // Subtract paused time if any
+    const adjustedElapsed = actualElapsedSeconds - (activeQuest.totalPausedTime || 0);
+    
+    // Check if timer has expired (remaining seconds <= 0)
     if (activeQuest.remainingSeconds <= 0) return true;
     
-    // Also check minimum elapsed time (at least 60% of estimated time must pass)
+    // Minimum required: at least 60% of estimated time OR 60 seconds, whichever is greater
     const totalSeconds = activeQuest.estimatedMinutes * 60;
-    const elapsedSeconds = totalSeconds - activeQuest.remainingSeconds;
-    const minRequiredSeconds = Math.max(60, totalSeconds * 0.6); // At least 1 min or 60% of time
+    const minRequiredSeconds = Math.max(60, totalSeconds * 0.6);
     
-    return elapsedSeconds >= minRequiredSeconds;
+    return adjustedElapsed >= minRequiredSeconds;
   },
   
   fetchProfile: async (userId: string) => {
