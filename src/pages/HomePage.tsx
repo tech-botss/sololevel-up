@@ -8,6 +8,8 @@ import { predefinedQuests } from '@/data/quests';
 import { Sparkles, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LevelUpPopup } from '@/components/LevelUpPopup';
+import { DailyRewardsModal } from '@/components/DailyRewardsModal';
+import { useDailySync } from '@/hooks/useDailySync';
 import {
   HeroSection,
   QuickActions,
@@ -32,14 +34,32 @@ export default function HomePage() {
     resumeQuest,
   } = useGameStore();
   
+  // Daily sync for quests completed today and login rewards
+  const {
+    questsCompletedToday: syncedQuestsToday,
+    xpEarnedToday,
+    loginStreak,
+    showDailyRewards,
+    dismissDailyRewards,
+    refreshSync,
+  } = useDailySync(user?.id);
+  
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [sessionXp, setSessionXp] = useState(0);
+  const [showRewardsModal, setShowRewardsModal] = useState(false);
 
   useEffect(() => {
     if (user) {
       fetchProfile(user.id);
     }
   }, [user, fetchProfile]);
+
+  // Show daily rewards modal on new day login
+  useEffect(() => {
+    if (showDailyRewards && user) {
+      setShowRewardsModal(true);
+    }
+  }, [showDailyRewards, user]);
 
   // Timer logic
   useEffect(() => {
@@ -56,10 +76,22 @@ export default function HomePage() {
     const result = await completeQuest();
     if (result.xpEarned > 0) {
       setSessionXp((prev) => prev + result.xpEarned);
+      // Refresh sync to update quests completed today
+      refreshSync();
     }
     if (result.leveledUp) {
       setShowLevelUp(true);
     }
+  };
+
+  const handleRewardClaimed = () => {
+    fetchProfile(user!.id);
+    refreshSync();
+  };
+
+  const handleCloseRewardsModal = () => {
+    setShowRewardsModal(false);
+    dismissDailyRewards();
   };
 
   const handleSignOut = async () => {
@@ -170,12 +202,12 @@ export default function HomePage() {
           )}
         </AnimatePresence>
 
-        {/* Today's Summary */}
+        {/* Today's Summary - Use synced data from DB */}
         <TodaySummary
-          questsCompleted={questsCompletedToday}
+          questsCompleted={syncedQuestsToday || questsCompletedToday}
           totalDailyQuests={10}
-          xpEarned={sessionXp}
-          streak={profile.current_streak}
+          xpEarned={xpEarnedToday || sessionXp}
+          streak={loginStreak || profile.current_streak}
         />
 
         {/* Quest Feed */}
@@ -189,6 +221,17 @@ export default function HomePage() {
         goldReward={profile.level * 100}
         onClose={() => setShowLevelUp(false)}
       />
+
+      {/* Daily Rewards Modal */}
+      {user && (
+        <DailyRewardsModal
+          isOpen={showRewardsModal}
+          onClose={handleCloseRewardsModal}
+          userId={user.id}
+          loginStreak={loginStreak}
+          onRewardClaimed={handleRewardClaimed}
+        />
+      )}
     </div>
   );
 }
