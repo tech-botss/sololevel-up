@@ -188,6 +188,7 @@ interface GameState {
   unequipCosmetic: (category: string) => Promise<boolean>;
   clearPendingAchievement: () => void;
   canCompleteQuest: () => boolean;
+  getSecondsUntilCompletable: () => number;
 }
 
 export const useGameStore = create<GameState>()((set, get) => ({
@@ -236,6 +237,37 @@ export const useGameStore = create<GameState>()((set, get) => ({
     
     // Must have actually spent the minimum time on the quest
     return adjustedElapsed >= minRequiredSeconds;
+  },
+  
+  getSecondsUntilCompletable: () => {
+    const { activeQuest } = get();
+    if (!activeQuest) return 0;
+    
+    const startedAt = activeQuest.startedAt;
+    const startTime = startedAt instanceof Date ? startedAt.getTime() : new Date(startedAt).getTime();
+    
+    if (isNaN(startTime)) return 0;
+    
+    const now = Date.now();
+    const actualElapsedMs = now - startTime;
+    const actualElapsedSeconds = Math.floor(actualElapsedMs / 1000);
+    
+    const totalPausedTime = activeQuest.totalPausedTime || 0;
+    
+    let currentPauseDuration = 0;
+    if (activeQuest.isPaused && activeQuest.pausedAt) {
+      const pausedAt = activeQuest.pausedAt instanceof Date 
+        ? activeQuest.pausedAt.getTime() 
+        : new Date(activeQuest.pausedAt).getTime();
+      currentPauseDuration = Math.floor((now - pausedAt) / 1000);
+    }
+    
+    const adjustedElapsed = actualElapsedSeconds - totalPausedTime - currentPauseDuration;
+    
+    const totalSeconds = activeQuest.estimatedMinutes * 60;
+    const minRequiredSeconds = Math.max(60, totalSeconds * 0.6);
+    
+    return Math.max(0, minRequiredSeconds - adjustedElapsed);
   },
   
   fetchProfile: async (userId: string) => {

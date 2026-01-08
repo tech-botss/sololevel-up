@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/gameStore';
 import { predefinedQuests } from '@/data/quests';
 import { Quest, QuestCategory } from '@/types/game';
-import { Clock, Zap, Coins, Play, Plus, Pause, X, CheckCircle, Sparkles, Code, Users } from 'lucide-react';
+import { Clock, Zap, Coins, Play, Plus, Pause, X, CheckCircle, Sparkles, Code, Users, Lock, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { CustomQuestBuilder } from '@/components/CustomQuestBuilder';
@@ -39,7 +39,8 @@ const listItemVariants = {
 };
 
 export default function QuestsPage() {
-  const { activeQuest, startQuest, pauseQuest, resumeQuest, abandonQuest, completeQuest, updateQuestTimer, canCompleteQuest, pendingAchievement, clearPendingAchievement } = useGameStore();
+  const { activeQuest, startQuest, pauseQuest, resumeQuest, abandonQuest, completeQuest, updateQuestTimer, canCompleteQuest, getSecondsUntilCompletable, pendingAchievement, clearPendingAchievement } = useGameStore();
+  const [secondsUntilUnlock, setSecondsUntilUnlock] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<QuestCategory | 'all'>('all');
   const [showQuestBuilder, setShowQuestBuilder] = useState(false);
   const [showDevQuestBuilder, setShowDevQuestBuilder] = useState(false);
@@ -54,14 +55,29 @@ export default function QuestsPage() {
 
   // Timer logic for active quest
   useEffect(() => {
-    if (!activeQuest || activeQuest.isPaused) return;
+    if (!activeQuest) return;
+    
+    // Update unlock countdown even when paused (it tracks real time)
+    const updateUnlockTimer = () => {
+      setSecondsUntilUnlock(getSecondsUntilCompletable());
+    };
+    
+    // Initial update
+    updateUnlockTimer();
+
+    if (activeQuest.isPaused) {
+      // When paused, still update unlock timer every second
+      const interval = setInterval(updateUnlockTimer, 1000);
+      return () => clearInterval(interval);
+    }
 
     const interval = setInterval(() => {
       updateQuestTimer(activeQuest.remainingSeconds - 1);
+      updateUnlockTimer();
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [activeQuest, updateQuestTimer]);
+  }, [activeQuest, updateQuestTimer, getSecondsUntilCompletable]);
 
   const handleStartQuest = (quest: Quest) => {
     if (!activeQuest) {
@@ -314,25 +330,75 @@ export default function QuestsPage() {
                   )}
                 </Button>
               </motion.div>
-              <motion.div className="flex-1" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <motion.div className="flex-1" whileHover={{ scale: canCompleteQuest() ? 1.02 : 1 }} whileTap={{ scale: canCompleteQuest() ? 0.98 : 1 }}>
                 <Button
-                  className="w-full"
+                  className={cn(
+                    "w-full relative overflow-hidden",
+                    canCompleteQuest() 
+                      ? "bg-green-600 hover:bg-green-700" 
+                      : "bg-muted/50 text-muted-foreground cursor-not-allowed"
+                  )}
                   onClick={handleCompleteQuest}
                   disabled={!canCompleteQuest()}
                 >
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Complete
+                  {canCompleteQuest() ? (
+                    <>
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Complete
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-4 h-4 mr-2" />
+                      Locked
+                    </>
+                  )}
                 </Button>
               </motion.div>
             </div>
-            {!canCompleteQuest() && (
-              <motion.p 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center text-[10px] text-muted-foreground mt-2"
+            
+            {/* Unlock Countdown Timer */}
+            {!canCompleteQuest() && secondsUntilUnlock > 0 && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-3 p-3 rounded-lg bg-primary/10 border border-primary/20"
               >
-                Complete at least 60% of the quest time to finish
-              </motion.p>
+                <div className="flex items-center justify-center gap-3">
+                  <div className="relative">
+                    <Timer className="w-5 h-5 text-primary animate-pulse" />
+                    <motion.div 
+                      className="absolute inset-0 rounded-full border-2 border-primary/50"
+                      animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground">Unlocks in</p>
+                    <p className="text-xl font-mono font-bold text-primary">
+                      {formatTime(secondsUntilUnlock)}
+                    </p>
+                  </div>
+                  <div className="flex-1 max-w-[120px]">
+                    <Progress 
+                      value={activeQuest ? ((activeQuest.estimatedMinutes * 60 * 0.6 - secondsUntilUnlock) / (activeQuest.estimatedMinutes * 60 * 0.6)) * 100 : 0} 
+                      className="h-2"
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+            
+            {canCompleteQuest() && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="mt-3 p-2 rounded-lg bg-green-500/10 border border-green-500/20 text-center"
+              >
+                <p className="text-xs text-green-400 flex items-center justify-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  Quest ready to complete!
+                </p>
+              </motion.div>
             )}
           </motion.div>
         )}
