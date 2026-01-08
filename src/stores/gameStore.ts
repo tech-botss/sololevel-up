@@ -205,22 +205,36 @@ export const useGameStore = create<GameState>()((set, get) => ({
     const { activeQuest } = get();
     if (!activeQuest) return false;
     
-    // Calculate actual elapsed time since quest started (not just remaining seconds)
-    const startTime = new Date(activeQuest.startedAt).getTime();
+    // Get the timestamp when quest started - handle both Date objects and strings
+    const startedAt = activeQuest.startedAt;
+    const startTime = startedAt instanceof Date ? startedAt.getTime() : new Date(startedAt).getTime();
+    
+    // Validate that we have a valid start time
+    if (isNaN(startTime)) return false;
+    
     const now = Date.now();
     const actualElapsedMs = now - startTime;
     const actualElapsedSeconds = Math.floor(actualElapsedMs / 1000);
     
-    // Subtract paused time if any
-    const adjustedElapsed = actualElapsedSeconds - (activeQuest.totalPausedTime || 0);
+    // Subtract paused time if quest was paused
+    const totalPausedTime = activeQuest.totalPausedTime || 0;
     
-    // Check if timer has expired (remaining seconds <= 0)
-    if (activeQuest.remainingSeconds <= 0) return true;
+    // If currently paused, add current pause duration
+    let currentPauseDuration = 0;
+    if (activeQuest.isPaused && activeQuest.pausedAt) {
+      const pausedAt = activeQuest.pausedAt instanceof Date 
+        ? activeQuest.pausedAt.getTime() 
+        : new Date(activeQuest.pausedAt).getTime();
+      currentPauseDuration = Math.floor((now - pausedAt) / 1000);
+    }
+    
+    const adjustedElapsed = actualElapsedSeconds - totalPausedTime - currentPauseDuration;
     
     // Minimum required: at least 60% of estimated time OR 60 seconds, whichever is greater
     const totalSeconds = activeQuest.estimatedMinutes * 60;
     const minRequiredSeconds = Math.max(60, totalSeconds * 0.6);
     
+    // Must have actually spent the minimum time on the quest
     return adjustedElapsed >= minRequiredSeconds;
   },
   
