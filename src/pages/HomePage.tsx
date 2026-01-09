@@ -32,6 +32,8 @@ export default function HomePage() {
     completeQuest,
     pauseQuest,
     resumeQuest,
+    canCompleteQuest,
+    getSecondsUntilCompletable,
   } = useGameStore();
   
   // Daily sync for quests completed today and login rewards
@@ -47,6 +49,7 @@ export default function HomePage() {
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [sessionXp, setSessionXp] = useState(0);
   const [showRewardsModal, setShowRewardsModal] = useState(false);
+  const [secondsUntilUnlock, setSecondsUntilUnlock] = useState(0);
 
   useEffect(() => {
     if (user) {
@@ -63,14 +66,29 @@ export default function HomePage() {
 
   // Timer logic
   useEffect(() => {
-    if (!activeQuest || activeQuest.isPaused) return;
+    if (!activeQuest) return;
+    
+    // Update unlock countdown
+    const updateUnlockTimer = () => {
+      setSecondsUntilUnlock(getSecondsUntilCompletable());
+    };
+    
+    // Initial update
+    updateUnlockTimer();
+
+    if (activeQuest.isPaused) {
+      // When paused, still update unlock timer every second
+      const interval = setInterval(updateUnlockTimer, 1000);
+      return () => clearInterval(interval);
+    }
 
     const interval = setInterval(() => {
       updateQuestTimer(activeQuest.remainingSeconds - 1);
+      updateUnlockTimer();
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [activeQuest, updateQuestTimer]);
+  }, [activeQuest, updateQuestTimer, getSecondsUntilCompletable]);
 
   const handleComplete = async () => {
     const result = await completeQuest();
@@ -192,6 +210,8 @@ export default function HomePage() {
               onPause={pauseQuest}
               onResume={resumeQuest}
               onComplete={handleComplete}
+              canComplete={canCompleteQuest()}
+              secondsUntilUnlock={secondsUntilUnlock}
             />
           ) : (
             <FeaturedQuest

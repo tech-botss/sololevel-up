@@ -1,20 +1,32 @@
 import { motion } from 'framer-motion';
-import { Pause, Play, Check, AlertTriangle } from 'lucide-react';
+import { Pause, Play, Check, AlertTriangle, Lock, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ActiveQuest } from '@/types/game';
+import { Progress } from '@/components/ui/progress';
 
 interface ActiveQuestCardProps {
   quest: ActiveQuest;
   onPause: () => void;
   onResume: () => void;
   onComplete: () => void;
+  canComplete: boolean;
+  secondsUntilUnlock: number;
 }
 
-export function ActiveQuestCard({ quest, onPause, onResume, onComplete }: ActiveQuestCardProps) {
+export function ActiveQuestCard({ quest, onPause, onResume, onComplete, canComplete, secondsUntilUnlock }: ActiveQuestCardProps) {
   const minutes = Math.floor(Math.abs(quest.remainingSeconds) / 60);
   const seconds = Math.abs(quest.remainingSeconds) % 60;
   const isOvertime = quest.remainingSeconds < 0;
   const progress = Math.max(0, Math.min(100, ((quest.estimatedMinutes * 60 - quest.remainingSeconds) / (quest.estimatedMinutes * 60)) * 100));
+
+  // Format unlock countdown
+  const unlockMinutes = Math.floor(secondsUntilUnlock / 60);
+  const unlockSeconds = secondsUntilUnlock % 60;
+  
+  // Calculate unlock progress (percentage of minimum time completed)
+  const totalSeconds = quest.estimatedMinutes * 60;
+  const minRequiredSeconds = Math.max(60, totalSeconds * 0.6);
+  const unlockProgress = Math.min(100, ((minRequiredSeconds - secondsUntilUnlock) / minRequiredSeconds) * 100);
 
   return (
     <motion.div
@@ -89,7 +101,7 @@ export function ActiveQuestCard({ quest, onPause, onResume, onComplete }: Active
         </motion.div>
 
         {/* Progress Bar */}
-        <div className="mb-6">
+        <div className="mb-4">
           <div className="h-2 bg-muted rounded-sm overflow-hidden border border-border">
             <motion.div
               className={`h-full ${isOvertime ? 'bg-destructive' : 'bg-primary'}`}
@@ -99,6 +111,40 @@ export function ActiveQuestCard({ quest, onPause, onResume, onComplete }: Active
             />
           </div>
         </div>
+
+        {/* Unlock Countdown */}
+        {!canComplete && secondsUntilUnlock > 0 && (
+          <motion.div 
+            className="mb-4 p-3 rounded-lg bg-muted/50 border border-border"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Lock className="w-4 h-4 text-muted-foreground" />
+                <span className="text-xs font-display text-muted-foreground tracking-wider">COMPLETE UNLOCKS IN</span>
+              </div>
+              <div className="flex items-center gap-1 text-primary font-display font-bold">
+                <Timer className="w-4 h-4" />
+                <span>{String(unlockMinutes).padStart(2, '0')}:{String(unlockSeconds).padStart(2, '0')}</span>
+              </div>
+            </div>
+            <Progress value={unlockProgress} className="h-1.5" />
+          </motion.div>
+        )}
+        
+        {canComplete && (
+          <motion.div 
+            className="mb-4 p-3 rounded-lg bg-accent/20 border border-accent/50"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+          >
+            <div className="flex items-center justify-center gap-2 text-accent">
+              <Check className="w-4 h-4" />
+              <span className="text-xs font-display tracking-wider">QUEST READY TO COMPLETE!</span>
+            </div>
+          </motion.div>
+        )}
 
         {/* Action Buttons */}
         <div className="flex gap-3">
@@ -122,9 +168,14 @@ export function ActiveQuestCard({ quest, onPause, onResume, onComplete }: Active
           )}
           <Button
             onClick={onComplete}
-            className="flex-1 btn-accent font-display tracking-wider"
+            disabled={!canComplete}
+            className="flex-1 btn-accent font-display tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Check className="w-4 h-4 mr-2" />
+            {canComplete ? (
+              <Check className="w-4 h-4 mr-2" />
+            ) : (
+              <Lock className="w-4 h-4 mr-2" />
+            )}
             COMPLETE
           </Button>
         </div>
