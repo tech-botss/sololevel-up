@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/gameStore';
 import { predefinedQuests } from '@/data/quests';
@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { useDeveloperRole } from '@/hooks/useDeveloperRole';
 import { useCommunityQuests } from '@/hooks/useCommunityQuests';
 import { AchievementPopup } from '@/components/AchievementPopup';
+import { playUnlockChime } from '@/lib/sounds';
 
 const categories: { id: QuestCategory | 'all'; label: string }[] = [
   { id: 'all', label: 'All' },
@@ -47,6 +48,7 @@ export default function QuestsPage() {
   const [customQuests, setCustomQuests] = useState<Quest[]>([]);
   const { isDeveloper } = useDeveloperRole();
   const { communityQuests, refetch: refetchCommunityQuests } = useCommunityQuests();
+  const hasPlayedUnlockSound = useRef(false);
 
   const allQuests = [...customQuests, ...communityQuests, ...predefinedQuests];
   const filteredQuests = selectedCategory === 'all' 
@@ -78,6 +80,17 @@ export default function QuestsPage() {
 
     return () => clearInterval(interval);
   }, [activeQuest, updateQuestTimer, getSecondsUntilCompletable]);
+
+  // Play unlock sound when quest becomes completable
+  useEffect(() => {
+    const isCompletable = canCompleteQuest();
+    if (isCompletable && !hasPlayedUnlockSound.current && activeQuest) {
+      hasPlayedUnlockSound.current = true;
+      playUnlockChime();
+    } else if (!activeQuest) {
+      hasPlayedUnlockSound.current = false;
+    }
+  }, [canCompleteQuest, activeQuest]);
 
   const handleStartQuest = (quest: Quest) => {
     if (!activeQuest) {

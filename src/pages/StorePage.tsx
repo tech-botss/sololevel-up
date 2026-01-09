@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGameStore } from '@/stores/gameStore';
 import { cosmetics, getCosmeticsByCategory } from '@/data/cosmetics';
-import { Coins, Check, Lock, Sparkles, ChevronRight } from 'lucide-react';
+import { Coins, Check, Lock, Sparkles, ChevronRight, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
@@ -11,6 +11,17 @@ import { AvatarPreview, CosmeticPreview } from '@/components/AvatarPreview';
 import { AuraPreview, AuraEffect, getAuraTypeFromId } from '@/components/AuraEffect';
 import { Cosmetic } from '@/types/game';
 import { StorePageSkeleton } from '@/components/skeletons';
+import { playPurchaseSound, playErrorSound } from '@/lib/sounds';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const categories = ['avatars', 'outfits', 'weapons', 'auras', 'name_colors', 'frames'];
 
@@ -49,6 +60,7 @@ export default function StorePage() {
   } = useGameStore();
   const [activeCategory, setActiveCategory] = useState('avatars');
   const [selectedItem, setSelectedItem] = useState<Cosmetic | null>(null);
+  const [purchaseConfirmItem, setPurchaseConfirmItem] = useState<Cosmetic | null>(null);
 
   useEffect(() => {
     if (user && !profile) {
@@ -72,6 +84,7 @@ export default function StorePage() {
       // Already owned, equip it
       const success = await equipCosmetic(item.id, item.category);
       if (success) {
+        playPurchaseSound();
         toast({ title: 'Equipped!', description: `${item.name} is now equipped` });
       }
       return;
@@ -79,6 +92,7 @@ export default function StorePage() {
 
     // Check if level locked
     if (item.unlockType === 'level' && item.unlockLevel && profile && profile.level < item.unlockLevel) {
+      playErrorSound();
       toast({ 
         title: 'Level Required', 
         description: `Reach level ${item.unlockLevel} to unlock this item`,
@@ -91,18 +105,36 @@ export default function StorePage() {
     if (item.price === 0 || item.unlockType === 'free') {
       const success = await purchaseCosmetic(item.id, 0);
       if (success) {
+        playPurchaseSound();
         toast({ title: 'Unlocked!', description: `You now own ${item.name}` });
       }
       return;
     }
 
-    // Purchase
-    const success = await purchaseCosmetic(item.id, item.price);
-    if (success) {
-      toast({ title: 'Purchased!', description: `You now own ${item.name}` });
-    } else {
+    // Show purchase confirmation dialog
+    setPurchaseConfirmItem(item);
+  };
+
+  const confirmPurchase = async () => {
+    if (!purchaseConfirmItem || !profile) return;
+    
+    if (profile.gold < purchaseConfirmItem.price) {
+      playErrorSound();
       toast({ title: 'Not enough gold', variant: 'destructive' });
+      setPurchaseConfirmItem(null);
+      return;
     }
+
+    const success = await purchaseCosmetic(purchaseConfirmItem.id, purchaseConfirmItem.price);
+    if (success) {
+      playPurchaseSound();
+      toast({ title: 'Purchased!', description: `You now own ${purchaseConfirmItem.name}` });
+    } else {
+      playErrorSound();
+      toast({ title: 'Purchase failed', variant: 'destructive' });
+    }
+    setPurchaseConfirmItem(null);
+    setSelectedItem(null);
   };
 
   const isLocked = (item: Cosmetic) => {
@@ -512,6 +544,77 @@ export default function StorePage() {
           </>
         )}
       </AnimatePresence>
+
+      {/* Purchase Confirmation Dialog */}
+      <AlertDialog open={!!purchaseConfirmItem} onOpenChange={(open) => !open && setPurchaseConfirmItem(null)}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display flex items-center gap-2">
+              <Coins className="w-5 h-5 text-accent" />
+              Confirm Purchase
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4">
+                {purchaseConfirmItem && (
+                  <>
+                    <div className="flex items-center justify-center py-4">
+                      {purchaseConfirmItem.category === 'avatars' ? (
+                        <AvatarPreview
+                          avatarId={purchaseConfirmItem.id}
+                          name={purchaseConfirmItem.name}
+                          rarity={purchaseConfirmItem.rarity as 'common' | 'uncommon' | 'rare' | 'legendary'}
+                          gender={purchaseConfirmItem.gender}
+                          size="lg"
+                          showGlow
+                        />
+                      ) : purchaseConfirmItem.category === 'auras' ? (
+                        <AuraPreview auraId={purchaseConfirmItem.id} size="lg" />
+                      ) : (
+                        <CosmeticPreview
+                          category={purchaseConfirmItem.category}
+                          name={purchaseConfirmItem.name}
+                          rarity={purchaseConfirmItem.rarity as 'common' | 'uncommon' | 'rare' | 'legendary'}
+                          size="lg"
+                        />
+                      )}
+                    </div>
+                    <p className="text-center">
+                      Purchase <span className="font-semibold text-foreground">{purchaseConfirmItem.name}</span> for{' '}
+                      <span className="font-bold text-accent">{purchaseConfirmItem.price.toLocaleString()} Gold</span>?
+                    </p>
+                    <div className="flex items-center justify-center gap-2 text-sm">
+                      <span className="text-muted-foreground">Your balance:</span>
+                      <span className={cn(
+                        "font-bold",
+                        profile && profile.gold >= purchaseConfirmItem.price ? "text-accent" : "text-destructive"
+                      )}>
+                        {profile?.gold.toLocaleString() || 0} Gold
+                      </span>
+                    </div>
+                    {profile && profile.gold < purchaseConfirmItem.price && (
+                      <div className="flex items-center justify-center gap-2 text-destructive text-sm">
+                        <AlertTriangle className="w-4 h-4" />
+                        <span>Not enough gold!</span>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmPurchase}
+              disabled={!profile || !purchaseConfirmItem || profile.gold < purchaseConfirmItem.price}
+              className="bg-primary hover:bg-primary/90"
+            >
+              <Coins className="w-4 h-4 mr-2" />
+              Confirm Purchase
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
