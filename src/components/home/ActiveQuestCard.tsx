@@ -1,8 +1,10 @@
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Pause, Play, Check, AlertTriangle, Lock, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ActiveQuest } from '@/types/game';
 import { Progress } from '@/components/ui/progress';
+import { playUnlockChime } from '@/lib/sounds';
 
 interface ActiveQuestCardProps {
   quest: ActiveQuest;
@@ -14,6 +16,8 @@ interface ActiveQuestCardProps {
 }
 
 export function ActiveQuestCard({ quest, onPause, onResume, onComplete, canComplete, secondsUntilUnlock }: ActiveQuestCardProps) {
+  const hasPlayedUnlockSound = useRef(false);
+  
   const minutes = Math.floor(Math.abs(quest.remainingSeconds) / 60);
   const seconds = Math.abs(quest.remainingSeconds) % 60;
   const isOvertime = quest.remainingSeconds < 0;
@@ -27,6 +31,16 @@ export function ActiveQuestCard({ quest, onPause, onResume, onComplete, canCompl
   const totalSeconds = quest.estimatedMinutes * 60;
   const minRequiredSeconds = Math.max(60, totalSeconds * 0.6);
   const unlockProgress = Math.min(100, ((minRequiredSeconds - secondsUntilUnlock) / minRequiredSeconds) * 100);
+
+  // Play unlock chime when quest becomes completable
+  useEffect(() => {
+    if (canComplete && !hasPlayedUnlockSound.current) {
+      hasPlayedUnlockSound.current = true;
+      playUnlockChime();
+    } else if (!canComplete) {
+      hasPlayedUnlockSound.current = false;
+    }
+  }, [canComplete]);
 
   return (
     <motion.div

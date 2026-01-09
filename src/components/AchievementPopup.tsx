@@ -3,49 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Achievement } from '@/types/game';
 import { getAchievementById } from '@/data/achievements';
 import { Trophy, X, Star, Sparkles } from 'lucide-react';
-
-interface AchievementPopupProps {
-  achievementId: string | null;
-  onClose: () => void;
-}
-
-// Achievement unlock sound using Web Audio API
-function playUnlockSound() {
-  try {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    
-    // Create a sequence of tones for the unlock sound
-    const playTone = (frequency: number, startTime: number, duration: number, volume: number = 0.15) => {
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(frequency, startTime);
-      
-      gainNode.gain.setValueAtTime(0, startTime);
-      gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.02);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-      
-      oscillator.start(startTime);
-      oscillator.stop(startTime + duration);
-    };
-    
-    const now = audioContext.currentTime;
-    
-    // Epic unlock sound sequence
-    playTone(523.25, now, 0.15, 0.2);         // C5
-    playTone(659.25, now + 0.1, 0.15, 0.2);   // E5
-    playTone(783.99, now + 0.2, 0.15, 0.2);   // G5
-    playTone(1046.50, now + 0.3, 0.4, 0.25);  // C6 (hold)
-    playTone(1318.51, now + 0.35, 0.4, 0.15); // E6 (shimmer)
-    
-  } catch (error) {
-    console.log('Audio not supported');
-  }
-}
+import { playAchievementSound } from '@/lib/sounds';
 
 const rarityColors = {
   common: 'from-gray-400 to-gray-600',
@@ -68,6 +26,11 @@ const rarityBorders = {
   legendary: 'border-amber-400/50',
 };
 
+interface AchievementPopupProps {
+  achievementId: string | null;
+  onClose: () => void;
+}
+
 export function AchievementPopup({ achievementId, onClose }: AchievementPopupProps) {
   const [achievement, setAchievement] = useState<Achievement | null>(null);
   const hasPlayedSound = useRef(false);
@@ -79,7 +42,7 @@ export function AchievementPopup({ achievementId, onClose }: AchievementPopupPro
       
       if (ach && !hasPlayedSound.current) {
         hasPlayedSound.current = true;
-        playUnlockSound();
+        playAchievementSound();
       }
     } else {
       hasPlayedSound.current = false;
